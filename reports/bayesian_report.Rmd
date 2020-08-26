@@ -348,7 +348,7 @@ prisma <- search_details %>%
          full_text_excluded = full_texts_assessed-total_included,
          previous_total = previous_total,
          previous_minus_superseded = previous_total-superseded,
-         current_total = current_total) %>%
+         current_total = current_total-superseded) %>%
   select("Review version" = review_version,
          "Date Screened" = date_screened,
          "OVID results" = "ovid_number_results",
@@ -395,7 +395,9 @@ a <- flextable(country) %>%
 a
 
 country <- subset(country, Country != "Multiple")
-
+```
+Currently studies are reported from `r paste(nrow(country))`
+``` {r}
 country <- mutate_geocode(country, Country)
 
 country_bounds <- country %>%
@@ -409,8 +411,6 @@ map_world <- map_data(map = "world") %>%
 
 save_as_docx(a, path = here('output_data', 'Countries_performing_studies.docx'))  
 ```
-Currently studies are reported from `r paste(length(unique(country)))`
-
 ## A map is produced for where the studies are performed
 ``` {r interactive global map, cache = TRUE}
 library(rgdal)

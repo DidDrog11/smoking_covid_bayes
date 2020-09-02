@@ -72,13 +72,16 @@ m1_ecdf(0.9) #minimally informative
 m1_a_ecdf(0.9) #informative
 m1_a_hh_ecdf(0.9) #high heterogeneity
 
-study_draws_m1 <- study_draw(m1)
+study_draws_m1 <- study_draw(m1) %>%
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
 pooled_draw_m1 <- pooled_effect_draw(m1)
 
-study_draws_m1_a <- study_draw(m1_a)
+study_draws_m1_a <- study_draw(m1_a) %>%
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
 pooled_draw_m1_a <- pooled_effect_draw(m1_a)
 
-study_draws_m1_a_hh <- study_draw(m1_a_hh)
+study_draws_m1_a_hh <- study_draw(m1_a_hh) %>%
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
 pooled_draw_m1_a_hh <- pooled_effect_draw(m1_a_hh)
 
 current_testing_minimal_prior <- forest_plot(
@@ -117,6 +120,8 @@ current_testing_alternative_prior_hh <- forest_plot(
   "m1_a_hh.png"
 )
 
+median_hdci(post_samples_m1_a$tau)
+
 # Former smokers testing --------------------------------------------------
 # Bayesian analysis for former smokers and testing for SARS-CoV-2
 
@@ -133,13 +138,16 @@ m2_a_hh_ecdf <- ecdf(exp(post_samples_m2_a_hh$TE))
 1-m2_a_ecdf(1.1) #informative
 1-m2_a_hh_ecdf(1.1) #high heterogeneity
 
-study_draws_m2 <- study_draw(m2)
+study_draws_m2 <- study_draw(m2) %>%
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
 pooled_draw_m2 <- pooled_effect_draw(m2)
 
-study_draws_m2_a <- study_draw(m2_a)
+study_draws_m2_a <- study_draw(m2_a) %>%
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
 pooled_draw_m2_a <- pooled_effect_draw(m2_a)
 
-study_draws_m2_a_hh <- study_draw(m2_a_hh)
+study_draws_m2_a_hh <- study_draw(m2_a_hh) %>%
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
 pooled_draw_m2_a_hh <- pooled_effect_draw(m2_a_hh)
 
 former_testing_minimal_prior <- forest_plot(
@@ -563,3 +571,13 @@ former_mortality_alternative_prior_hh <- forest_plot(
 
 ecdf_list <- list(m1_a_ecdf, m2_a_ecdf, m3_a_ecdf, m4_a_ecdf, m5_a_ecdf, m6_a_ecdf, m7_a_ecdf, m8_a_ecdf)
 write_rds(ecdf_list, here("data_clean", "bayesian_models", "ecdf_list.RDS"))
+
+#  Tau heterogeneity ------------------------------------------------------
+median_hdci(post_samples_m1_a$tau)
+median_hdci(post_samples_m2_a$tau)
+median_hdci(post_samples_m3_a$tau)
+median_hdci(post_samples_m4_a$tau)
+median_hdci(post_samples_m5_a$tau)
+median_hdci(post_samples_m6_a$tau)
+median_hdci(post_samples_m7_a$tau)
+median_hdci(post_samples_m8_a$tau)

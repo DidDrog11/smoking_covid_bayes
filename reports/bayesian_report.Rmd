@@ -255,7 +255,7 @@ analysed_versions <- c('v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7')
 We define the current version of the report here. At the moment this needs to be changed directly when compiling the code. This report has been generated for version `r paste(current_version)`
 
 ``` {r excluding_studies}
-exclude_from_analysis <- c('isaric_1', 'isaric_2', 'isaric_3', 'miyara_old', 'isaric_4', 'mehra', 'hopkinson', 'gaibazzi', 'miyara_updated', 'russell_old', "petrilli_old", "magagnoli_old", "niedzwiedz_old", "bello_chavolla_old", "kimmig_old", "russell_old", "zuo_zuo_old", "patel_old", "shi_zuo_old")
+exclude_from_analysis <- c('isaric_1', 'isaric_2', 'isaric_3', 'miyara_old', 'isaric_4', 'mehra', 'hopkinson', 'gaibazzi', 'miyara_updated', 'russell_old', "petrilli_old", "magagnoli_old", "niedzwiedz_old", "bello_chavolla_old", "kimmig_old", "russell_old", "zuo_zuo_old", "patel_old", "shi_zuo_old", "riley_old")
 ```
 We don't want to remove studies from the dataset despite them no longer being included in the analysis. The excluded studies are defined in this chunk of code. We have excluded this version the following studies:
 -`r knitr::combine_words(exclude_from_analysis)`
@@ -1018,7 +1018,7 @@ table_2 <- table_2_word
 included_studies <- quality_table_2 %>%
   filter(overall_quality != 'poor') %>%
   select(lead_author) %>%
-  filter(lead_author != "reiter")
+  filter(!lead_author %in% c("reiter", "hippisley_cox"))
 
 meta <- tibble('author' = table_2$lead_author,
                'negative_smoker' = table_2$negative_current_smoker,

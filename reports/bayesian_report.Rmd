@@ -59,10 +59,8 @@ library(ggmap)
 source(here("scripts", "author_dictionary.R"))
 ```
 ## Download data
-We maintain a Google sheets document [here](sheets_id) which contains all eligible articles the research team have identified. This is currently viewable only and not open for editing. We have collected the general information for the search in the first sheet, the studies general information in the second, further information on study populations, outcomes of interest and quality of the studies are contained in the further sheets. These sheets are organised in a similar way to the manuscript and so are labelled table_1 to table_6.
-
 ``` {r google_data}
-sheets_id <- as_sheets_id("https://docs.google.com/spreadsheets/d/1HV2Zk_UD2_s1zzd47dCyb4UKRSM0dDg7zmUPA9CMdx4/edit?usp=sharing")
+sheets_id <- as_sheets_id("https://docs.google.com/spreadsheets/d/1sTlqMbGiWDWJT3dTpa3YQU4z6qcWb0v6Wkp40RcWLXQ/edit?usp=sharing")
 search_details <- read_sheet(sheets_id, range = 'article_screening')
 data_study_general <- read_sheet(sheets_id, range =  'general_details')
 table_1 <- read_sheet(sheets_id, sheet = 'pop_descriptives')
@@ -72,13 +70,17 @@ table_4 <-  read_sheet(sheets_id, sheet = 'severity')
 table_5 <-  read_sheet(sheets_id, sheet = 'mortality')
 table_6 <-  read_sheet(sheets_id, sheet = 'updated_quality_appraisal')
 ```
+We maintain a Google sheets document [here](sheets_id) which contains all eligible articles the research team have identified. This is currently viewable only and not open for editing. We have collected the general information for the search in the first sheet, the studies general information in the second, further information on study populations, outcomes of interest and quality of the studies are contained in the further sheets. These sheets are organised in a similar way to the manuscript and so are labelled table_1 to table_6.
+
+The pull requests from the API may happen too rapidly if this is run as a chunk so it's better to run this line by line.
+
 We have extracted data from `r nrow(data_study_general)` studies, however, some of these are duplicates and some have been removed from the analysis set. For example there have been multiple versions of the ISARIC report and several publications have been retracted. We aim to keep on top of this but there is some risk that in between versions data may be superseded.
 
 ## Raw Data
 The first sheet is **Search details**  we use this sheet to keep track of the number of studies found in our search and keep track of the number of titles and abstracts screened and number of papers included in each review version. It presents the data in groups of search periods.
 
 ```{r head_search_details}
-flextable(search_details[,1:11])
+flextable(search_details[,1:12])
 ```
 The second sheet is **General study details** this includes the lead author, where the study is published, the date it was published, the country in which the data originated and the DoI or link to the publication for our records.
 This is a searchable list of all the studies that have met out inclusion and exclusion criteria up until `r paste(max(search_details$date_screened))`. These are live links and should direct to the relevant article, however, some may have been deleted or require institutional access.
@@ -244,18 +246,25 @@ save_as_docx(a, path = here('output_data', 'all_studies.docx'))
 ``` {r versioning}
 date_of_update <- Sys.Date()
 
-prev_versions <- c('v1', 'v2', 'v3', 'v4', 'v5', 'v6')
+prev_versions <- head(unique(data_study_general$review_version), n = -1)
 #This can categorise which studies we want to look at
-current_version <- c('v7')
+current_version <- tail(unique(data_study_general$review_version), n = 1)
 #This will categorise which studies we are including in the current report
 
-analysed_versions <- c('v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7')
+analysed_versions <- c(prev_versions, current_version)
 #This will incorporate all studies into the current version of the report
 ```
-We define the current version of the report here. At the moment this needs to be changed directly when compiling the code. This report has been generated for version `r paste(current_version)`
+We define the current version of the report here. This report has been generated for version `r paste(current_version)`
 
 ``` {r excluding_studies}
-exclude_from_analysis <- c('isaric_1', 'isaric_2', 'isaric_3', 'miyara_old', 'isaric_4', 'mehra', 'hopkinson', 'gaibazzi', 'miyara_updated', 'russell_old', "petrilli_old", "magagnoli_old", "niedzwiedz_old", "bello_chavolla_old", "kimmig_old", "russell_old", "zuo_zuo_old", "patel_old", "shi_zuo_old", "riley_old")
+superseded_studies <- names(tidyselect::vars_select(data_study_general$lead_author, ends_with("_old", ignore.case = T)))
+old_isaric <- head(names(tidyselect::vars_select(data_study_general$lead_author, starts_with("isaric", ignore.case = T))), n = -1)
+excluded_other_reason <- c("mehra", #retracted
+                           "hopkinson", #self-reported
+                           "gaibazzi" #withdrawn
+                           )
+
+exclude_from_analysis <- c(superseded_studies, old_isaric, excluded_other_reason)
 ```
 We don't want to remove studies from the dataset despite them no longer being included in the analysis. The excluded studies are defined in this chunk of code. We have excluded this version the following studies:
 -`r knitr::combine_words(exclude_from_analysis)`
@@ -456,7 +465,7 @@ my_spdf@data$Number[ which(my_spdf@data$Number == 0)] = NA
 my_spdf@data$total_cases[ which(is.na(my_spdf@data$total_cases))] = 0
 
 
-my_bins <- c(0, 1, 5, 10, 20, 30, 40, 70)
+my_bins <- c(0, 1, 5, 10, 20, 30, 40, 80)
 mypalette <- colorBin(palette="YlOrBr", domain=my_spdf@data$Number, na.color="transparent", bins=my_bins)
 
 mytext <- paste(
@@ -728,7 +737,7 @@ save_as_docx(b, path = here('output_data', 'Supplementary_1c.docx'))
 
 #Smoking prevalence by country
 country_prevalence_list <- table_1 %>%
-    group_by(country, add = T) %>%
+    group_by(country, .add = T) %>%
   mutate(., current_smok_percentage = current_smoker/total*100) %>%
   mutate(., former_smok_percentage = former_smoker/total*100) %>%
   mutate(., missing_percentage = missing/total*100) %>%
@@ -890,7 +899,7 @@ a <- flextable(a) %>%
   colformat_num(col_keys = 'Sample size', digits = 0, na_str = '-', big.mark = ',') %>%
   set_table_properties(width = 1, layout = 'autofit')
 
-save_as_docx(a, path = here('output_data', 'Table_1.docx'))
+#save_as_docx(a, path = here('output_data', 'Table_1.docx'))
 ```
 
 ## Table 2: Smoking and COVID-19 diagnostic testing
@@ -1018,7 +1027,7 @@ table_2 <- table_2_word
 included_studies <- quality_table_2 %>%
   filter(overall_quality != 'poor') %>%
   select(lead_author) %>%
-  filter(!lead_author %in% c("reiter", "hippisley_cox"))
+  filter(!lead_author %in% c("reiter", "hippisley_cox", "ullah"))
 
 meta <- tibble('author' = table_2$lead_author,
                'negative_smoker' = table_2$negative_current_smoker,
@@ -1032,42 +1041,19 @@ meta$author <- to_upper_camel_case(meta$author, sep_out = ", ")
 meta$author <- plyr::mapvalues(meta$author,
                                from = cleaned_names,
                                to = correct_names)
+study_dup <- filter(meta, author != "Niedzwiedz")
+study_dup <- study_dup$author
 
-testing_rr <- list()
-testing_rr[[1]] <- RR_testing('Rentsch', 'current')
-testing_rr[[2]] <- RR_testing('Rentsch', 'former')
-testing_rr[[3]] <- RR_testing('Cho', 'current')
-testing_rr[[4]] <- RR_testing('Cho', 'former')
-testing_rr[[5]] <- RR_testing('Kolin', 'current')
-testing_rr[[6]] <- RR_testing('Kolin', 'former')
-testing_rr[[7]] <- RR_testing('de Lusignan', 'current')
-testing_rr[[8]] <- RR_testing('de Lusignan', 'former')
-testing_rr[[9]] <- RR_testing('Parrotta', 'current')
-testing_rr[[10]] <- RR_testing('Parrotta', 'former')
-testing_rr[[11]] <- RR_testing('Israel', 'current')
-testing_rr[[12]] <- RR_testing('Israel', 'former')
-testing_rr[[13]] <- RR_testing('Eugen-Olsen', 'current')
-testing_rr[[14]] <- RR_testing('Eugen-Olsen', 'former')
-testing_rr[[15]] <- RR_testing('Houlihan', 'current')
-testing_rr[[16]] <- RR_testing('Houlihan', 'former')
-testing_rr[[17]] <- RR_testing('Woolford', 'current')
-testing_rr[[18]] <- RR_testing('Woolford', 'former')
-testing_rr[[19]] <- RR_testing('Govind', 'current')
-testing_rr[[20]] <- RR_testing('Govind', 'former')
-testing_rr[[21]] <- RR_testing('Gu', 'current')
-testing_rr[[22]] <- RR_testing('Gu', 'former')
-testing_rr[[23]] <- RR_testing('Petrilli', 'current')
-testing_rr[[24]] <- RR_testing('Petrilli', 'former')
-testing_rr[[25]] <- RR_testing('Auvinen', 'current')
-testing_rr[[26]] <- RR_testing('Auvinen', 'former')
-testing_rr[[27]] <- RR_testing('Merkely', 'current')
-testing_rr[[28]] <- RR_testing('Merkely', 'former')
-testing_rr[[29]] <- RR_testing('Iversen', 'current')
-testing_rr[[30]] <- RR_testing('Iversen', 'former')
-testing_rr[[31]] <- RR_testing('Fillmore', 'current')
-testing_rr[[32]] <- RR_testing('Fillmore', 'former')
+testing_rr_current <- list()
+for(study in 1:length(study_dup)){
+  testing_rr_current[[study]] <- RR_testing(study_dup[study], "current")
+}
+testing_rr_former <- list()
+for(study in 1:length(study_dup)){
+  testing_rr_former[[study]] <- RR_testing(study_dup[study], "former")
+}
 
-data <- testing_rr
+data <- c(testing_rr_current, testing_rr_former)
 k <- do.call(rbind.data.frame, data)
 
 #SEs for Niedzwiedz et al. 2020
@@ -1547,7 +1533,8 @@ meta <- tibble('author' = table_4$lead_author,
                'severe_never_smoker' = table_4$severe_disease_never_smoker,
                'non_severe_former_smoker' = table_4$non_severe_former_smoker,
                'severe_former_smoker' = table_4$severe_disease_former_smoker) %>%
-  filter(author %in% included_studies$lead_author)
+  filter(author %in% included_studies$lead_author) %>%
+  filter(author != "hippisley_cox")
 
 meta$author <- to_upper_camel_case(meta$author, sep_out = ", ")
 meta$author <- plyr::mapvalues(meta$author,

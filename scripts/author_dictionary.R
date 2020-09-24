@@ -26,7 +26,8 @@ cleaned_names <- c('Chow, Us, Cdc',
                    "De, Melo",
                    "De, Souza",
                    "Bello, Chavolla, Antonio, Villa",
-                   "Antonio, Villa")
+                   "Antonio, Villa",
+                   "Rubio, Rivas")
 
 correct_names <- c('Chow (US CDC)',
                    "Gold (US CDC)",
@@ -56,4 +57,5 @@ correct_names <- c('Chow (US CDC)',
                    "de Melo",
                    "de Souza",
                    "Bello-Chavolla, Antonio-Villa",
-                   "Antonio-Villa")
+                   "Antonio-Villa",
+                   "Rubio-Rivas")

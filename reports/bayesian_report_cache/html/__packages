@@ -5,6 +5,7 @@ ggplot2
 tidybayes
 readr
 dplyr
+tidyr
 ggridges
 glue
 stringr
@@ -16,7 +17,6 @@ flextable
 googlesheets4
 linelist
 DT
-tidyr
 epitools
 ggmap
 sp

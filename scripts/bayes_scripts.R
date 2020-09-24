@@ -85,7 +85,7 @@ forest_plot <- function(model, data_study, data_pooled, cut, title, type, filena
          title = title,
          caption = type
          ) +
-    scale_fill_discrete(name = "Review version", labels = c("Previous version (v6)", "Current version (v7)", "Pooled effect")) +
+    scale_fill_discrete(name = "Review version", labels = c("Previous version (v7)", "Current version (v8)", "Pooled effect")) +
     xlim(0, cut) +
     theme_minimal() +
     theme(panel.spacing = unit(0.1, "lines"),

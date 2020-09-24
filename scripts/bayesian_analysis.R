@@ -14,8 +14,8 @@ library(snakecase)
 source(here("scripts", "bayes_scripts.R"))
 source(here("scripts", "author_dictionary.R"))
 
-previous_review_versions <- c("v1", "v2", "v3", "v4", "v5", "v6")
-current_review_version <- "v7"
+previous_review_versions <- prev_versions
+current_review_version <- current_version
 
 data_study_general <- read_rds(here("data_clean", "data_study_general.rds"))
 
@@ -73,15 +73,18 @@ m1_a_ecdf(0.9) #informative
 m1_a_hh_ecdf(0.9) #high heterogeneity
 
 study_draws_m1 <- study_draw(m1) %>%
-  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*",
+                         ifelse(Author == "Carrat", "Carrat*", Author)))
 pooled_draw_m1 <- pooled_effect_draw(m1)
 
 study_draws_m1_a <- study_draw(m1_a) %>%
-  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*",
+                         ifelse(Author == "Carrat", "Carrat*", Author)))
 pooled_draw_m1_a <- pooled_effect_draw(m1_a)
 
 study_draws_m1_a_hh <- study_draw(m1_a_hh) %>%
-  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*",
+                         ifelse(Author == "Carrat", "Carrat*", Author)))
 pooled_draw_m1_a_hh <- pooled_effect_draw(m1_a_hh)
 
 current_testing_minimal_prior <- forest_plot(
@@ -100,7 +103,7 @@ current_testing_alternative_prior <- forest_plot(
   pooled_draw_m1_a,
   cut = 4,
   "Forest plot of current smokers and risk of testing positive",
-  "v6 testing prior",
+  "v7 testing prior",
   "m1_a.png"
 )
 
@@ -139,15 +142,18 @@ m2_a_hh_ecdf <- ecdf(exp(post_samples_m2_a_hh$TE))
 1-m2_a_hh_ecdf(1.1) #high heterogeneity
 
 study_draws_m2 <- study_draw(m2) %>%
-  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*",
+                         ifelse(Author == "Carrat", "Carrat*", Author)))
 pooled_draw_m2 <- pooled_effect_draw(m2)
 
 study_draws_m2_a <- study_draw(m2_a) %>%
-  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*",
+                         ifelse(Author == "Carrat", "Carrat*", Author)))
 pooled_draw_m2_a <- pooled_effect_draw(m2_a)
 
 study_draws_m2_a_hh <- study_draw(m2_a_hh) %>%
-  mutate(Author = ifelse(Author == "Merkely", "Merkely*", Author))
+  mutate(Author = ifelse(Author == "Merkely", "Merkely*",
+                         ifelse(Author == "Carrat", "Carrat*", Author)))
 pooled_draw_m2_a_hh <- pooled_effect_draw(m2_a_hh)
 
 former_testing_minimal_prior <- forest_plot(
@@ -166,7 +172,7 @@ former_testing_alternative_prior <- forest_plot(
   pooled_draw_m2_a,
   cut = 3,
   "Forest plot of former smokers and risk of testing positive",
-  "v6 testing prior",
+  "v7 testing prior",
   "m2_a.png"
 )
 
@@ -228,7 +234,7 @@ current_hospitalisation_alternative_prior <- forest_plot(
   pooled_draw_m3_a,
   cut = 3,
   "Forest plot of current smokers and risk of hospital admission",
-  "v6 hospitalisation prior",
+  "v7 hospitalisation prior",
   "m3_a.png"
 )
 
@@ -291,7 +297,7 @@ former_hospitalisation_alternative_prior <- forest_plot(
   pooled_draw_m4_a,
   cut = 3,
   "Forest plot of former smokers and risk of hospital admission",
-  "v6 hospitalisation prior",
+  "v7 hospitalisation prior",
   "m4_a.png"
 )
 
@@ -358,7 +364,7 @@ current_severity_alternative_prior <- forest_plot(
   pooled_draw_m5_a,
   cut = 3,
   "Forest plot of current smokers and risk of severe disease",
-  "v6 severity prior",
+  "v7 severity prior",
   "m5_a.png"
 )
 
@@ -423,7 +429,7 @@ former_severity_alternative_prior <- forest_plot(
   pooled_draw_m6_a,
   cut = 4,
   "Forest plot of former smokers and risk of severe disease",
-  "v6 severity prior",
+  "v7 severity prior",
   "m6_a.png"
 )
 
@@ -468,6 +474,20 @@ pooled_draw_m7_a <- pooled_effect_draw(m7_a)
 study_draws_m7_a_hh <- study_draw(m7_a_hh)
 pooled_draw_m7_a_hh <- pooled_effect_draw(m7_a_hh)
 
+###Temp for Rubio
+study_draws_m7 <- study_draws_m7 %>%
+  mutate(review_version = as.character(review_version),
+         review_version = ifelse(is.na(review_version), "current", review_version),
+         review_version = as_factor(review_version))
+study_draws_m7_a <- study_draws_m7_a %>%
+  mutate(review_version = as.character(review_version),
+         review_version = ifelse(is.na(review_version), "current", review_version),
+         review_version = as_factor(review_version))
+study_draws_m7_a_hh <- study_draws_m7_a_hh %>%
+  mutate(review_version = as.character(review_version),
+         review_version = ifelse(is.na(review_version), "current", review_version),
+         review_version = as_factor(review_version))
+
 current_mortality_minimal_prior <- forest_plot(
   m7,
   study_draws_m7,
@@ -484,7 +504,7 @@ current_mortality_alternative_prior <- forest_plot(
   pooled_draw_m7_a,
   cut = 5,
   "Forest plot of current smokers and mortality",
-  "v6 mortality prior",
+  "v7 mortality prior",
   "m7_a.png"
 )
 
@@ -530,6 +550,20 @@ pooled_draw_m8_a <- pooled_effect_draw(m8_a)
 study_draws_m8_a_hh <- study_draw(m8_a_hh)
 pooled_draw_m8_a_hh <- pooled_effect_draw(m8_a_hh)
 
+##Temp for Rubio
+study_draws_m8 <- study_draws_m8 %>%
+  mutate(review_version = as.character(review_version),
+         review_version = ifelse(is.na(review_version), "current", review_version),
+         review_version = as_factor(review_version))
+study_draws_m8_a <- study_draws_m8_a %>%
+  mutate(review_version = as.character(review_version),
+         review_version = ifelse(is.na(review_version), "current", review_version),
+         review_version = as_factor(review_version))
+study_draws_m8_a_hh <- study_draws_m8_a_hh %>%
+  mutate(review_version = as.character(review_version),
+         review_version = ifelse(is.na(review_version), "current", review_version),
+         review_version = as_factor(review_version))
+
 former_mortality_minimal_prior <- forest_plot(
   m8,
   study_draws_m8,
@@ -546,7 +580,7 @@ former_mortality_alternative_prior <- forest_plot(
   pooled_draw_m8_a,
   cut = 5,
   "Forest plot of former smokers and mortality",
-  "v6 mortality prior",
+  "v7 mortality prior",
   "m8_a.png"
 )
 
@@ -556,7 +590,7 @@ plot(m8_a_ecdf, main = "Empirical cumulative distribution, former smokers, morta
 abline(v = 1.1, col = "red")
 dev.off()
 
-former_mortality_alternative_prior_hh <- forest_plot(
+former_mortality_alternative_prior_a_hh <- forest_plot(
   m8_a_hh,
   study_draws_m8_a_hh,
   pooled_draw_m8_a_hh,

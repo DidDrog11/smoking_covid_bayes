@@ -17,8 +17,8 @@ source(here("scripts", "author_dictionary.R"))
 
 data_study_general <- readRDS(here("data_clean", "data_study_general.rds"))
                               
-previous_review_versions <- c("v1", "v2", "v3", "v4", "v5", "v6")
-current_review_version <- "v7"
+previous_review_versions <- prev_versions
+current_review_version <- current_version
 
 study_review_version <- data_study_general %>%
   mutate(lead_author = to_upper_camel_case(lead_author, sep_out = ", "),
@@ -66,28 +66,28 @@ minimally_informative_prior <-
 
 # Previous meta-analysis guided priors
 current_testing_prior <-
-  c(prior(normal(-.30, 1), class = Intercept),
+  c(prior(normal(-.301, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_testing_prior <-
-  c(prior(normal(0.06, 1), class = Intercept),
+  c(prior(normal(0.049, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 current_hospitalisation_prior <-
-  c(prior(normal(0.05, 1), class = Intercept),
+  c(prior(normal(0.058, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_hospitalisation_prior <-
-  c(prior(normal(0.18, 1), class = Intercept),
+  c(prior(normal(0.182, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 current_severity_prior <-
-  c(prior(normal(0.14, 1), class = Intercept),
+  c(prior(normal(0.223, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_severity_prior <-
-  c(prior(normal(0.41, 1), class = Intercept),
+  c(prior(normal(0.419, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 current_mortality_prior <-
-  c(prior(normal(0.64, 1), class = Intercept),
+  c(prior(normal(0.199, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_mortality_prior <- 
-  c(prior(normal(0.65, 1), class = Intercept),
+  c(prior(normal(0.329, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 
 # Classical meta-analysis guided priors with high heterogeneity
@@ -95,25 +95,25 @@ current_testing_prior_hh <-
   c(prior(normal(-.30, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd))
 former_testing_prior_hh <-
-  c(prior(normal(0.06, 1), class = Intercept),
+  c(prior(normal(0.049, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd))
 current_hospitalisation_prior_hh <-
-  c(prior(normal(0.05, 1), class = Intercept),
+  c(prior(normal(0.058, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 former_hospitalisation_prior_hh <-
-  c(prior(normal(0.18, 1), class = Intercept),
+  c(prior(normal(0.182, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 current_severity_prior_hh <-
-  c(prior(normal(0.14, 1), class = Intercept),
+  c(prior(normal(0.223, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 former_severity_prior_hh <-
-  c(prior(normal(0.41, 1), class = Intercept),
+  c(prior(normal(0.419, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd))
 current_mortality_prior_hh <-
-  c(prior(normal(0.64, 1), class = Intercept),
+  c(prior(normal(0.199, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 former_mortality_prior_hh <- 
-  c(prior(normal(0.65, 1), class = Intercept),
+  c(prior(normal(0.329, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 
 

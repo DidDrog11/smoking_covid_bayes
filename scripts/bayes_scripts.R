@@ -1,3 +1,5 @@
+library(tidyverse)
+
 extract_TE <- function(dataset) {
   tibble(dataset$studlab,
          dataset$TE,

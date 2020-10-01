@@ -139,6 +139,10 @@ pp_check(m1_a_hh)
 summary(m1_a_hh)
 ranef(m1_a_hh)
 
+write_rds(m1, here("data_clean", "bayesian_models", "testing_current_m1.rds"))
+write_rds(m1_a, here("data_clean", "bayesian_models", "testing_current_m1_a.rds"))
+write_rds(m1_a_hh, here("data_clean", "bayesian_models", "testing_current_m1_a_hh.rds"))
+
 ##Testing former
 m2 <-
   bayes_test(testing_bayes_f, minimally_informative_prior, iterations = 40000)
@@ -158,6 +162,9 @@ pp_check(m2_a_hh)
 summary(m2_a_hh)
 ranef(m2_a_hh)
 
+write_rds(m2, here("data_clean", "bayesian_models", "testing_former_m2.rds"))
+write_rds(m2_a, here("data_clean", "bayesian_models", "testing_former_m2_a.rds"))
+write_rds(m2_a_hh, here("data_clean", "bayesian_models", "testing_former_m2_a_hh.rds"))
 ##Hospitalisation current
 m3 <-
   bayes_test(hospital_bayes_c, minimally_informative_prior, iterations = 40000)
@@ -272,12 +279,7 @@ pp_check(m8_a_hh)
 summary(m8_a_hh)
 ranef(m8_a_hh)
 
-write_rds(m1, here("data_clean", "bayesian_models", "testing_current_m1.rds"))
-write_rds(m1_a, here("data_clean", "bayesian_models", "testing_current_m1_a.rds"))
-write_rds(m1_a_hh, here("data_clean", "bayesian_models", "testing_current_m1_a_hh.rds"))
-write_rds(m2, here("data_clean", "bayesian_models", "testing_former_m2.rds"))
-write_rds(m2_a, here("data_clean", "bayesian_models", "testing_former_m2_a.rds"))
-write_rds(m2_a_hh, here("data_clean", "bayesian_models", "testing_former_m2_a_hh.rds"))
+
 write_rds(m3, here("data_clean", "bayesian_models", "hospitalisation_current_m3.rds"))
 write_rds(m3_a, here("data_clean", "bayesian_models", "hospitalisation_current_m3_a.rds"))
 write_rds(m3_a_hh, here("data_clean", "bayesian_models", "hospitalisation_current_m3_a_hh.rds"))

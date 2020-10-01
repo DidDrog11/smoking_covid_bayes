@@ -12,7 +12,34 @@ extrafont::loadfonts(device = "win")
 
 ## get data
 data <-  read_rds(here::here('data_clean', 'country_prevalence_data.rds')) %>%
-  mutate(country = recode(country, "SouthKorea" = "South Korea"))
+  mutate(country = recode(country, "SouthKorea" = "South Korea"),
+         study_setting = recode(study_setting, "quarantine_centre" = "community"),
+         study_id  = factor(study_id),
+         study_setting = factor(study_setting),
+         smoking = factor(smoking)) %>%
+  group_by(country, study_setting, smoking, study) %>%
+  mutate(mean = ifelse(is.na(weightedMean(prevalence, w = true_sample)), mean(prevalence),
+                       weightedMean(prevalence, w = true_sample, na.rm = T)),
+         mean_uci = ifelse(is.na(weightedMean(upper_ci, w = true_sample)), mean(upper_ci),
+                       weightedMean(upper_ci, w = true_sample, na.rm = T)),
+         mean_lci = ifelse(is.na(weightedMean(lower_ci, w = true_sample)), mean(lower_ci),
+                       weightedMean(lower_ci, w = true_sample, na.rm = T))) %>%
+  ungroup() %>%
+  group_by(country, smoking, study) %>%
+  mutate(ranked_n = factor(row_number()))
+
+ordered_country <- data %>%
+  filter(study_id != is.na(study_id)) %>%
+  group_by(country, study_id) %>%
+  summarise(count = n()) %>%
+  ungroup() %>%
+  group_by(country) %>%
+  summarise(count = sum(count)) %>%
+  arrange(desc(count)) %>%
+  select(country)
+ordered_country <- as.vector(t(ordered_country))
+data$country <- factor(data$country, levels = ordered_country)
+
 country_colour <- data.frame(gapminder, cc = I(country_colors[match(gapminder$country, names(country_colors))]))
 country_colour <- country_colour %>%
   select(country, cc) %>%
@@ -24,6 +51,15 @@ country_colour <- country_colour %>%
   distinct() %>%
   filter(country %in% data$country) %>%
   deframe()
+
+current_smoking_plot <- data %>%
+  filter(smoking == "current_smoking_p") %>%
+  drop_na(country)
+
+former_smoking_plot <- data %>%
+  filter(smoking == "former_smoking_p") %>%
+  drop_na(country) %>%
+  filter(!country %in% c("Mexico", "Iran", "Turkey", "India", "Kuwait", "Poland", "Qatar", "Switzerland", "Netherlands"))
 
 ## sort data
 sorted_data <- data %>%
@@ -46,7 +82,7 @@ sorted_data$running_count <- as_factor(sorted_data$running_count)
 
 current_sorted_data <- sorted_data %>%
   filter(., smoking == "current_smoking_p") %>%
-  arrange(-prevalence, .by_group = T) %>%
+  arrange(-prevalence, study_setting, .by_group = T) %>%
   ungroup() %>%
   group_by(country) %>%
   filter(!n <= 1)
@@ -134,4 +170,77 @@ a
 png(here::here('reports', 'figure', 'figure_2b.png'), width=912, height=967, res = 120)
 a
 null <- dev.off()
-  
+
+## new plots current
+png(here("reports", "figure", "current_smoking_plots_updated.png"), width = 833, height = 719)
+ggplot() +
+  geom_point(data = current_smoking_plot %>%
+               filter(study != 0), 
+             aes(x = study_setting, y = prevalence, colour = study_setting, size = true_sample),
+             position = position_dodge2(0.3),
+             alpha = 0.3)  +
+  scale_size_continuous(trans = "log10", guide = F) +
+  geom_hline(data = current_smoking_plot %>%
+               filter(study == 0),
+             aes(yintercept = mean),
+             linetype = "solid", 
+             colour = "#A50026",
+             size = 0.8) +
+  geom_hline(data = current_smoking_plot %>%
+               filter(study == 1),
+             aes(yintercept = mean, colour = study_setting)) +
+  coord_flip() +
+  facet_grid(country ~ .,  scales = "free_y", space = "free", switch = 'y') +
+  scale_color_brewer(palette = "Dark2", labels = c("Community", "Community & Hospital", "Hospital")) +
+  scale_y_continuous(name = "Prevalence", limits = c(0, 0.7), breaks = scales::pretty_breaks(n = 9), expand = c(0, 0)) +
+  theme(panel.spacing = unit(0.1, "lines"),
+        strip.text = element_text(angle = 0, size = 12),
+        axis.title = element_text(size = 10),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_text(size = 10),
+        panel.background = element_blank(),
+        axis.line.x = element_line(colour = "black"),
+        strip.text.y.left = element_text(angle = 0),
+        legend.position = "right") +
+  labs(title ="Prevalence of current smoking in included studies",
+       colour = "Weighted mean prevalence", shape = "Study setting")
+dev.off
+
+## new plots former
+png(here("reports", "figure", "former_smoking_plots_updated.png"), width = 833, height = 719)
+ggplot() +
+  geom_point(data = former_smoking_plot %>%
+               filter(study != 0), 
+             aes(x = study_setting, y = prevalence, colour = study_setting, size = true_sample),
+             position = position_dodge2(0.3),
+             alpha = 0.3)  +
+  scale_size_continuous(trans = "log10", guide = F) +
+  geom_hline(data = former_smoking_plot %>%
+               filter(study == 0),
+             aes(yintercept = mean),
+             linetype = "solid", 
+             colour = "#A50026",
+             size = 0.8) +
+  geom_hline(data = former_smoking_plot %>%
+               filter(study == 1),
+             aes(yintercept = mean, colour = study_setting)) +
+  coord_flip() +
+  facet_grid(country ~ .,  scales = "free_y", space = "free", switch = 'y') +
+  scale_color_brewer(palette = "Dark2", labels = c("Community", "Community & Hospital", "Hospital")) +
+  scale_y_continuous(name = "Prevalence", limits = c(0, 0.7), breaks = scales::pretty_breaks(n = 9), expand = c(0, 0)) +
+  theme(panel.spacing = unit(0.1, "lines"),
+        strip.text = element_text(angle = 0, size = 12),
+        axis.title = element_text(size = 10),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_text(size = 10),
+        panel.background = element_blank(),
+        axis.line.x = element_line(colour = "black"),
+        strip.text.y.left = element_text(angle = 0),
+        legend.position = "right") +
+  labs(title ="Prevalence of former smoking in included studies",
+       colour = "Weighted mean prevalence", shape = "Study setting")
+dev.off()

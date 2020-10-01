@@ -253,6 +253,9 @@ current_version <- tail(unique(data_study_general$review_version), n = 1)
 
 analysed_versions <- c(prev_versions, current_version)
 #This will incorporate all studies into the current version of the report
+
+versioning <- cbind(prev_versions, current_version, analysed_versions)
+write_rds(versioning, here("data_clean", "versioning.rds"))
 ```
 We define the current version of the report here. This report has been generated for version `r paste(current_version)`
 
@@ -261,7 +264,8 @@ superseded_studies <- names(tidyselect::vars_select(data_study_general$lead_auth
 old_isaric <- head(names(tidyselect::vars_select(data_study_general$lead_author, starts_with("isaric", ignore.case = T))), n = -1)
 excluded_other_reason <- c("mehra", #retracted
                            "hopkinson", #self-reported
-                           "gaibazzi" #withdrawn
+                           "gaibazzi", #withdrawn
+                           "kua" #self-reported
                            )
 
 exclude_from_analysis <- c(superseded_studies, old_isaric, excluded_other_reason)
@@ -567,6 +571,11 @@ table_1$data_source %>%
   set_table_properties(width = 0.5, layout = 'autofit')
 ```
 
+## Classification of COVID
+``` {r diagnosis_method}
+table(data_study_general$diagnostic_approach)
+```
+
 # Smoking descriptive data {.tabset .tabset-fade .tabset-pills}
 ``` {r smokers}
 #Studies reporting smokers
@@ -753,12 +762,12 @@ Confidence intervals are obtained through bootstrap estimates of a thousand repe
 ## Graph for smoking prevalence
 **Current smoking prevalence**
 The studies are grouped by the country in which they were conducted. The solid line represents national current smoking prevalence obtained from national smoking survey estimates. Studies are further grouped by the setting in which they were conducted, Hospital (Triangle), Community (Square) and Community and Hospital (Circle). The size of the shape corresponds to the relative size of the study sample. The weighted mean current smoking prevalence is displayed for each setting.
-![Country smoking prevalence](figure/figure_2a.png)
+![Country smoking prevalence](figure/current_smoking_plots_updated.png)
 
 ## Graph for former smoking prevalence
 **Former smoker prevalence**
 This graph is for former smoking prevalence. The data is more sparse for this exposure and therefore several countries are missing for the analysis. Studies are further grouped by the setting in which they were conducted, Hospital (Triangle), Community (Square) and Community and Hospital (Circle). The size of the shape corresponds to the relative size of the study sample. The weighted mean current smoking prevalence is displayed for each setting.
-![Country former smoking prevalence](figure/figure_2b.png)
+![Country former smoking prevalence](figure/former_smoking_plots_updated.png)
 
 # Final results tables and meta-analyses {.tabset .tabset-fade .tabset-pills}
 
@@ -899,7 +908,7 @@ a <- flextable(a) %>%
   colformat_num(col_keys = 'Sample size', digits = 0, na_str = '-', big.mark = ',') %>%
   set_table_properties(width = 1, layout = 'autofit')
 
-#save_as_docx(a, path = here('output_data', 'Table_1.docx'))
+save_as_docx(a, path = here('output_data', 'Table_1.docx'))
 ```
 
 ## Table 2: Smoking and COVID-19 diagnostic testing

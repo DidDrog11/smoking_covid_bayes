@@ -13,9 +13,10 @@ library(snakecase)
 
 source(here("scripts", "bayes_scripts.R"))
 source(here("scripts", "author_dictionary.R"))
+versions <- read_rds(here("data_clean", "versioning.rds"))
 
-previous_review_versions <- prev_versions
-current_review_version <- current_version
+previous_review_versions <- unique(versions[,1])
+current_review_version <- unique(versions[,2])
 
 data_study_general <- read_rds(here("data_clean", "data_study_general.rds"))
 
@@ -192,6 +193,7 @@ former_testing_alternative_prior_hh <- forest_plot(
   "m2_a_hh.png"
 )
 
+median_hdci(post_samples_m2_a$tau)
 
 # Current smokers hospitalisation --------------------------------------------------
 # Bayesian analysis for current smokers and hospitalisation for SARS-CoV-2

@@ -171,6 +171,27 @@ png(here::here('reports', 'figure', 'figure_2b.png'), width=912, height=967, res
 a
 null <- dev.off()
 
+## Limiting plots to countries with more than 3 studies worth of data.
+current_country_list <- current_smoking_plot %>%
+  group_by(country, study) %>%
+  summarise(number_studies = n()) %>%
+  filter(study != 0) %>%
+  filter(!number_studies < 3) %>%
+  select(country)
+
+current_smoking_plot <- current_smoking_plot %>%
+  filter(country %in% current_country_list$country)
+
+former_country_list <- former_smoking_plot %>%
+  group_by(country, study) %>%
+  summarise(number_studies = n()) %>%
+  filter(study != 0) %>%
+  filter(!number_studies < 3) %>%
+  select(country)
+
+former_smoking_plot <- former_smoking_plot %>%
+  filter(country %in% former_country_list$country)
+
 ## new plots current
 png(here("reports", "figure", "current_smoking_plots_updated.png"), width = 833, height = 719)
 ggplot() +
@@ -183,7 +204,7 @@ ggplot() +
   geom_hline(data = current_smoking_plot %>%
                filter(study == 0),
              aes(yintercept = mean),
-             linetype = "solid", 
+             linetype = "dashed", 
              colour = "#A50026",
              size = 0.8) +
   geom_hline(data = current_smoking_plot %>%
@@ -220,7 +241,7 @@ ggplot() +
   geom_hline(data = former_smoking_plot %>%
                filter(study == 0),
              aes(yintercept = mean),
-             linetype = "solid", 
+             linetype = "dashed", 
              colour = "#A50026",
              size = 0.8) +
   geom_hline(data = former_smoking_plot %>%

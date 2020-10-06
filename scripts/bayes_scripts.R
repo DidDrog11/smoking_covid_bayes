@@ -50,7 +50,14 @@ forest_plot <- function(model, data_study, data_pooled, cut, title, type, filena
     ungroup() %>%
     mutate(Author = str_replace_all(Author, "[.]", " ")) %>%
     mutate(Author = reorder(Author, b_Intercept),
-           b_Intercept = exp(b_Intercept))
+           b_Intercept = exp(b_Intercept),
+           review_version = as_factor(review_version))
+  forest_data$review_version <- plyr::mapvalues(forest_data$review_version, from = c("previous",
+                                                                                     "current",
+                                                                                     "combined_pooled"),
+                                                to = c("Previous version (v7)",
+                                                       "Current version (v8)",
+                                                       "Pooled effect"))
   summary_forest <- group_by(forest_data, Author, review_version) %>%
     median_qi(b_Intercept)
   graph <- ggplot(aes(b_Intercept, relevel(Author, "Pooled Effect", after = Inf), fill = review_version),
@@ -87,7 +94,7 @@ forest_plot <- function(model, data_study, data_pooled, cut, title, type, filena
          title = title,
          caption = type
          ) +
-    scale_fill_discrete(name = "Review version", labels = c("Previous version (v7)", "Current version (v8)", "Pooled effect")) +
+    scale_fill_discrete(name = "Review version") +
     xlim(0, cut) +
     theme_minimal() +
     theme(panel.spacing = unit(0.1, "lines"),

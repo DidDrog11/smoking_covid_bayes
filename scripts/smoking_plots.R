@@ -87,89 +87,89 @@ current_sorted_data <- sorted_data %>%
   group_by(country) %>%
   filter(!n <= 1)
 
-a <- ggplot(data = filter(current_sorted_data, study == 1), aes(x = running_count, y = prevalence)) +
-  geom_point(aes(size = true_sample, shape = factor(study_setting))) + 
-  scale_size_continuous(trans = "log10", guide = F) +
-  scale_shape_manual(values = c(15, 16, 17), labels = c("Community", "Community & Hospital", "Hospital")) +
-  geom_linerange(aes(ymin = lower_ci, ymax =upper_ci), linetype = "solid") +
-  geom_segment(data = filter(current_sorted_data, study == 1), aes(x = 0-0.5, 
-                                                                   xend = n+0.5,
-                                                                   y = mean,
-                                                                   yend = mean,
-                                                                   colour = study_setting), size = 0.8) +
-  scale_color_brewer(palette = "Dark2", labels = c("Community", "Community & Hospital", "Hospital")) +
-  geom_segment(data = filter(current_sorted_data, study == 0), aes(x = 0-0.5, 
-                                                                   xend = n+0.5,
-                                                                   y = prevalence,
-                                                                   yend = prevalence), linetype = "solid", 
-               colour = "#A50026",
-               size = 0.8) +
-    coord_flip() +
-    facet_grid(country ~  ., scales = "free_y", space = "free", switch = 'y') +
-  scale_y_continuous(name = "Prevalence", limits = c(0, 0.7), breaks = scales::pretty_breaks(n = 9), expand = c(0, 0)) +
-  theme(panel.spacing = unit(0.1, "lines"),
-        strip.text = element_text(angle = 0, size = 12),
-        axis.title = element_text(size = 10),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.x = element_text(size = 10),
-        panel.background = element_blank(),
-        axis.line.x = element_line(colour = "black"),
-        strip.text.y.left = element_text(angle = 0),
-        legend.position = "right") +
-  labs(title ="Prevalence of current smoking in included studies",
-       colour = "Weighted mean prevalence", shape = "Study setting")
-a
-
-png(here::here('reports', 'figure', 'figure_2a.png'), width=912, height=970, res = 120)
-a
-null <- dev.off()
-
-
-former_sorted_data <- sorted_data %>%
-  filter(., smoking == "former_smoking_p") %>%
-  filter(., !n <= 1 ) %>%
-  arrange(-prevalence, .by_group = T)
-
-a <- ggplot(data = filter(former_sorted_data, study == 1), aes(x = running_count, y = prevalence)) +
-  geom_point(aes(size = true_sample, shape = factor(study_setting))) + 
-  scale_size_continuous(trans = "log10", guide = F) +
-  scale_shape_manual(values = c(15, 16, 17), labels = c("Community", "Community & Hospital", "Hospital")) +
-  geom_linerange(aes(ymin = lower_ci, ymax =upper_ci), linetype = "solid") +
-  geom_segment(data = filter(former_sorted_data, study == 1), aes(x = 0, 
-                                                                   xend = n + 0.5,
-                                                                   y = mean,
-                                                                   yend = mean,
-                                                                   colour = study_setting), size = 0.8) +
-  scale_color_brewer(palette = "Dark2", labels = c("Community", "Community & Hospital", "Hospital")) +
-  geom_segment(data = filter(former_sorted_data, study == 0), aes(x = 0, 
-                                                                   xend = n + 0.5,
-                                                                   y = prevalence,
-                                                                   yend = prevalence), linetype = "solid", 
-               colour = "#A50026",
-               size = 0.8) +
-  scale_y_continuous(name = "Prevalence", limits = c(0, 0.9), breaks = scales::pretty_breaks(n = 9), expand = c(0, 0)) +
-  coord_flip() +
-  facet_grid(country ~  ., scales = "free_y", space = "free", switch = 'y') +
-  theme(panel.spacing = unit(0.1, "lines"),
-        strip.text = element_text(angle = 0, size = 12),
-        axis.title = element_text(size = 10),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.x = element_text(size = 10),
-        panel.background = element_blank(),
-        axis.line.x = element_line(colour = "black"),
-        strip.text.y.left = element_text(angle = 0),
-        legend.position = "right") +
-  labs(title ="Prevalence of former smoking in included studies",
-       colour = "Weighted mean prevalence", shape = "Study setting")
-a
-
-png(here::here('reports', 'figure', 'figure_2b.png'), width=912, height=967, res = 120)
-a
-null <- dev.off()
+# a <- ggplot(data = filter(current_sorted_data, study == 1), aes(x = running_count, y = prevalence)) +
+#   geom_point(aes(size = true_sample, shape = factor(study_setting))) + 
+#   scale_size_continuous(trans = "log10", guide = F) +
+#   scale_shape_manual(values = c(15, 16, 17), labels = c("Community", "Community & Hospital", "Hospital")) +
+#   geom_linerange(aes(ymin = lower_ci, ymax =upper_ci), linetype = "solid") +
+#   geom_segment(data = filter(current_sorted_data, study == 1), aes(x = 0-0.5, 
+#                                                                    xend = n+0.5,
+#                                                                    y = mean,
+#                                                                    yend = mean,
+#                                                                    colour = study_setting), size = 0.8) +
+#   scale_color_brewer(palette = "Dark2", labels = c("Community", "Community & Hospital", "Hospital")) +
+#   geom_segment(data = filter(current_sorted_data, study == 0), aes(x = 0-0.5, 
+#                                                                    xend = n+0.5,
+#                                                                    y = prevalence,
+#                                                                    yend = prevalence), linetype = "solid", 
+#                colour = "#A50026",
+#                size = 0.8) +
+#     coord_flip() +
+#     facet_grid(country ~  ., scales = "free_y", space = "free", switch = 'y') +
+#   scale_y_continuous(name = "Prevalence", limits = c(0, 0.7), breaks = scales::pretty_breaks(n = 9), expand = c(0, 0)) +
+#   theme(panel.spacing = unit(0.1, "lines"),
+#         strip.text = element_text(angle = 0, size = 12),
+#         axis.title = element_text(size = 10),
+#         axis.text.y = element_blank(),
+#         axis.title.y = element_blank(),
+#         axis.ticks.y = element_blank(),
+#         axis.text.x = element_text(size = 10),
+#         panel.background = element_blank(),
+#         axis.line.x = element_line(colour = "black"),
+#         strip.text.y.left = element_text(angle = 0),
+#         legend.position = "right") +
+#   labs(title ="Prevalence of current smoking in included studies",
+#        colour = "Weighted mean prevalence", shape = "Study setting")
+# a
+# 
+# png(here::here('reports', 'figure', 'figure_2a.png'), width=912, height=970, res = 120)
+# a
+# null <- dev.off()
+# 
+# 
+# former_sorted_data <- sorted_data %>%
+#   filter(., smoking == "former_smoking_p") %>%
+#   filter(., !n <= 1 ) %>%
+#   arrange(-prevalence, .by_group = T)
+# 
+# a <- ggplot(data = filter(former_sorted_data, study == 1), aes(x = running_count, y = prevalence)) +
+#   geom_point(aes(size = true_sample, shape = factor(study_setting))) + 
+#   scale_size_continuous(trans = "log10", guide = F) +
+#   scale_shape_manual(values = c(15, 16, 17), labels = c("Community", "Community & Hospital", "Hospital")) +
+#   geom_linerange(aes(ymin = lower_ci, ymax =upper_ci), linetype = "solid") +
+#   geom_segment(data = filter(former_sorted_data, study == 1), aes(x = 0, 
+#                                                                    xend = n + 0.5,
+#                                                                    y = mean,
+#                                                                    yend = mean,
+#                                                                    colour = study_setting), size = 0.8) +
+#   scale_color_brewer(palette = "Dark2", labels = c("Community", "Community & Hospital", "Hospital")) +
+#   geom_segment(data = filter(former_sorted_data, study == 0), aes(x = 0, 
+#                                                                    xend = n + 0.5,
+#                                                                    y = prevalence,
+#                                                                    yend = prevalence), linetype = "solid", 
+#                colour = "#A50026",
+#                size = 0.8) +
+#   scale_y_continuous(name = "Prevalence", limits = c(0, 0.9), breaks = scales::pretty_breaks(n = 9), expand = c(0, 0)) +
+#   coord_flip() +
+#   facet_grid(country ~  ., scales = "free_y", space = "free", switch = 'y') +
+#   theme(panel.spacing = unit(0.1, "lines"),
+#         strip.text = element_text(angle = 0, size = 12),
+#         axis.title = element_text(size = 10),
+#         axis.text.y = element_blank(),
+#         axis.title.y = element_blank(),
+#         axis.ticks.y = element_blank(),
+#         axis.text.x = element_text(size = 10),
+#         panel.background = element_blank(),
+#         axis.line.x = element_line(colour = "black"),
+#         strip.text.y.left = element_text(angle = 0),
+#         legend.position = "right") +
+#   labs(title ="Prevalence of former smoking in included studies",
+#        colour = "Weighted mean prevalence", shape = "Study setting")
+# a
+# 
+# png(here::here('reports', 'figure', 'figure_2b.png'), width=912, height=967, res = 120)
+# a
+# null <- dev.off()
 
 ## Limiting plots to countries with more than 3 studies worth of data.
 current_country_list <- current_smoking_plot %>%
@@ -193,7 +193,6 @@ former_smoking_plot <- former_smoking_plot %>%
   filter(country %in% former_country_list$country)
 
 ## new plots current
-png(here("reports", "figure", "current_smoking_plots_updated.png"), width = 833, height = 719)
 ggplot() +
   geom_point(data = current_smoking_plot %>%
                filter(study != 0), 
@@ -227,10 +226,9 @@ ggplot() +
         legend.position = "right") +
   labs(title ="Prevalence of current smoking in included studies",
        colour = "Weighted mean prevalence", shape = "Study setting")
-dev.off
+ggsave("current_smoking_plots_updated.png", plot = last_plot(), dpi = 360, path = here("reports", "figure"))
 
 ## new plots former
-png(here("reports", "figure", "former_smoking_plots_updated.png"), width = 833, height = 719)
 ggplot() +
   geom_point(data = former_smoking_plot %>%
                filter(study != 0), 
@@ -264,4 +262,4 @@ ggplot() +
         legend.position = "right") +
   labs(title ="Prevalence of former smoking in included studies",
        colour = "Weighted mean prevalence", shape = "Study setting")
-dev.off()
+ggsave("former_smoking_plots_updated.png", plot = last_plot(), dpi = 360, path = here("reports", "figure"))

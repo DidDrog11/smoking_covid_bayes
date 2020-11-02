@@ -1,5 +1,5 @@
 ---
-title: 'Smoking and COVID Living Review (v7): a bayesian analysis'
+title: 'Smoking and COVID Living Review (v8): a bayesian analysis'
 author: "David Simons, Lion Shahab, Jamie Brown and Olga Perski"
 date: "`r format(Sys.time(), '%A %d %B %Y')`"
 output: 
@@ -60,7 +60,7 @@ source(here("scripts", "author_dictionary.R"))
 ```
 ## Download data
 ``` {r google_data}
-sheets_id <- as_sheets_id("https://docs.google.com/spreadsheets/d/1sTlqMbGiWDWJT3dTpa3YQU4z6qcWb0v6Wkp40RcWLXQ/edit?usp=sharing")
+sheets_id <- as_sheets_id("https://docs.google.com/spreadsheets/d/1yLtpbk29oUKOGceVw2IAJlt9CbbbPWmltzOW_LG6Su8/edit?usp=sharing")
 search_details <- read_sheet(sheets_id, range = 'article_screening')
 data_study_general <- read_sheet(sheets_id, range =  'general_details')
 table_1 <- read_sheet(sheets_id, sheet = 'pop_descriptives')
@@ -271,11 +271,15 @@ excluded_other_reason <- c("mehra", #retracted
 exclude_from_analysis <- c(superseded_studies, old_isaric, excluded_other_reason)
 ```
 We don't want to remove studies from the dataset despite them no longer being included in the analysis. The excluded studies are defined in this chunk of code. We have excluded this version the following studies:
--`r knitr::combine_words(exclude_from_analysis)`
+
+`r knitr::combine_words(exclude_from_analysis)`
+
 Generally we label these as _old in the Google sheet but there are exceptions to this so we manually define them at the moment.
 
 ## Filter the included studies
-Based on the version and excluded studies we produce the tables for analysis. This is a searchable table.
+Based on the version and excluded studies we produce the tables for analysis. 
+
+This is a searchable table.
 ``` {r descriptives}
 data_study_general <- data_study_general %>%
   filter(review_version %in% analysed_versions) %>%
@@ -755,13 +759,14 @@ country_prevalence_list <- table_1 %>%
   group_split()
 
 ```
-We have split the data into a list where each country can be analysed separately if required
+We have split the data into a list where each country can be analysed separately if required.
 
-Confidence intervals are obtained through bootstrap estimates of a thousand repetitions of the included studies. Following the production of the confidence intervals from bootstrapping in `olgas_script.R` the prevalence graphs are produced in the `smoking_plots.R` script. This uses data extracted on current and former smoking prevalence data from countries which have included studies in this review.
+Prevalence graphs are produced in the `smoking_plots.R` script. This uses data extracted on current and former smoking prevalence data from countries which have included studies in this review. We calculate the mean weighted prevalence.
 
 ## Graph for smoking prevalence
 **Current smoking prevalence**
-The studies are grouped by the country in which they were conducted. The solid line represents national current smoking prevalence obtained from national smoking survey estimates. Studies are further grouped by the setting in which they were conducted, Hospital (Triangle), Community (Square) and Community and Hospital (Circle). The size of the shape corresponds to the relative size of the study sample. The weighted mean current smoking prevalence is displayed for each setting.
+The studies are grouped by the country in which they were conducted. The dashed line represents national current smoking prevalence obtained from national smoking survey estimates. The size of the shape corresponds to the relative size of the study sample. The weighted mean current smoking prevalence is displayed for each setting.
+
 ![Country smoking prevalence](figure/current_smoking_plots_updated.png)
 
 ## Graph for former smoking prevalence
@@ -1854,6 +1859,9 @@ The ECDF shows the probability of the risk being greater than or equal to RR = 1
 ## Study quality assessment
 ``` {r table_6}
 #Table 6
+good <- filter(quality_rating, quality_rating$overall_quality == "good" ) %>%
+  filter(!lead_author %in% exclude_from_analysis) %>%
+  nrow()
 fair <- filter(quality_rating, quality_rating$overall_quality == "fair" ) %>%
   filter(!lead_author %in% exclude_from_analysis) %>%
   nrow()
@@ -1861,7 +1869,7 @@ poor <- filter(quality_rating, quality_rating$overall_quality == "poor" ) %>%
   filter(!lead_author %in% exclude_from_analysis) %>%
   nrow()
 ```
-The number of **Fair** quality studies are `r paste(fair)` with `r paste(poor)` **Poor** quality studies
+The number of **Good** quality studies are `r paste(good)`, **Fair** quality studies are `r paste(fair)` with `r paste(poor)` **Poor** quality studies
 
 The number of studies included in **Meta-analysis** are `r paste(nrow(running_meta_count))`
 

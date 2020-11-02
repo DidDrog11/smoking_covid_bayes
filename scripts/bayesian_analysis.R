@@ -104,7 +104,7 @@ current_testing_alternative_prior <- forest_plot(
   pooled_draw_m1_a,
   cut = 4,
   "Forest plot of current smokers and risk of testing positive",
-  "v7 testing prior",
+  "v8 testing prior",
   "m1_a.png"
 )
 
@@ -173,7 +173,7 @@ former_testing_alternative_prior <- forest_plot(
   pooled_draw_m2_a,
   cut = 3,
   "Forest plot of former smokers and risk of testing positive",
-  "v7 testing prior",
+  "v8 testing prior",
   "m2_a.png"
 )
 
@@ -236,7 +236,7 @@ current_hospitalisation_alternative_prior <- forest_plot(
   pooled_draw_m3_a,
   cut = 3,
   "Forest plot of current smokers and risk of hospital admission",
-  "v7 hospitalisation prior",
+  "v8 hospitalisation prior",
   "m3_a.png"
 )
 
@@ -256,6 +256,7 @@ current_hospitalisation_alternative_prior_hh <- forest_plot(
   "m3_a_hh.png"
 )
 
+median_hdci(post_samples_m3_a$tau)
 
 # Former smokers hospitalisation --------------------------------------------------
 # Bayesian analysis for former smokers and hospitalisation for SARS-CoV-2
@@ -299,7 +300,7 @@ former_hospitalisation_alternative_prior <- forest_plot(
   pooled_draw_m4_a,
   cut = 3,
   "Forest plot of former smokers and risk of hospital admission",
-  "v7 hospitalisation prior",
+  "v8 hospitalisation prior",
   "m4_a.png"
 )
 
@@ -320,10 +321,10 @@ former_hospitalisation_alternative_prior_hh <- forest_plot(
   "m4_a_hh.png"
 )
 
+median_hdci(post_samples_m4_a$tau)
 
 # Current smokers disease severity --------------------------------------------------
 # Bayesian analysis for current smokers and severity for SARS-CoV-2
-
 
 post_samples_m5 <- post_samples(m5)
 post_samples_m5_a <- post_samples(m5_a)
@@ -366,7 +367,7 @@ current_severity_alternative_prior <- forest_plot(
   pooled_draw_m5_a,
   cut = 3,
   "Forest plot of current smokers and risk of severe disease",
-  "v7 severity prior",
+  "v8 severity prior",
   "m5_a.png"
 )
 
@@ -386,9 +387,10 @@ current_severity_alternative_prior_hh <- forest_plot(
   "m5_a_hh.png"
 )
 
+median_hdci(post_samples_m5_a$tau)
+
 # Former smokers disease severity --------------------------------------------------
 # Bayesian analysis for current smokers and severity for SARS-CoV-2
-
 
 post_samples_m6 <- post_samples(m6)
 post_samples_m6_a <- post_samples(m6_a)
@@ -431,7 +433,7 @@ former_severity_alternative_prior <- forest_plot(
   pooled_draw_m6_a,
   cut = 4,
   "Forest plot of former smokers and risk of severe disease",
-  "v7 severity prior",
+  "v8 severity prior",
   "m6_a.png"
 )
 
@@ -451,6 +453,7 @@ former_severity_alternative_prior <- forest_plot(
   "m6_a_hh.png"
 )
 
+median_hdci(post_samples_m6_a$tau)
 # Current smokers mortality --------------------------------------------------
 # Bayesian analysis for current smokers and mortality from SARS-CoV-2
 
@@ -506,7 +509,7 @@ current_mortality_alternative_prior <- forest_plot(
   pooled_draw_m7_a,
   cut = 5,
   "Forest plot of current smokers and mortality",
-  "v7 mortality prior",
+  "v8 mortality prior",
   "m7_a.png"
 )
 
@@ -526,9 +529,9 @@ current_mortality_alternative_prior_hh <- forest_plot(
   "m7_a_hh.png"
 )
 
+median_hdci(post_samples_m7_a$tau)
 # Former smokers mortality --------------------------------------------------
 # Bayesian analysis for former smokers and mortality from SARS-CoV-2
-
 
 post_samples_m8 <- post_samples(m8)
 post_samples_m8_a <- post_samples(m8_a)
@@ -582,7 +585,7 @@ former_mortality_alternative_prior <- forest_plot(
   pooled_draw_m8_a,
   cut = 5,
   "Forest plot of former smokers and mortality",
-  "v7 mortality prior",
+  "v8 mortality prior",
   "m8_a.png"
 )
 
@@ -602,7 +605,7 @@ former_mortality_alternative_prior_a_hh <- forest_plot(
   "m8_a_hh.png"
 )
 
-
+median_hdci(post_samples_m8_a$tau)
 # ECDF --------------------------------------------------------------------
 
 ecdf_list <- list(m1_a_ecdf, m2_a_ecdf, m3_a_ecdf, m4_a_ecdf, m5_a_ecdf, m6_a_ecdf, m7_a_ecdf, m8_a_ecdf)

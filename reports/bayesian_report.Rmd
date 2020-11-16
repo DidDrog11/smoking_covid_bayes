@@ -1,5 +1,5 @@
 ---
-title: 'Smoking and COVID Living Review (v8): a bayesian analysis'
+title: 'Smoking and COVID Living Review (v9): a bayesian analysis'
 author: "David Simons, Lion Shahab, Jamie Brown and Olga Perski"
 date: "`r format(Sys.time(), '%A %d %B %Y')`"
 output: 
@@ -268,7 +268,7 @@ excluded_other_reason <- c("mehra", #retracted
                            "kua" #self-reported
                            )
 
-exclude_from_analysis <- c(superseded_studies, old_isaric, excluded_other_reason)
+exclude_from_analysis <- unique(c(superseded_studies, old_isaric, excluded_other_reason))
 ```
 We don't want to remove studies from the dataset despite them no longer being included in the analysis. The excluded studies are defined in this chunk of code. We have excluded this version the following studies:
 

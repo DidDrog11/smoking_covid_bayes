@@ -1,5 +1,5 @@
 ---
-title: 'Smoking and COVID Living Review (v9): a bayesian analysis'
+title: 'Smoking and COVID Living Review (v10): a bayesian analysis'
 author: "David Simons, Lion Shahab, Jamie Brown and Olga Perski"
 date: "`r format(Sys.time(), '%A %d %B %Y')`"
 output: 
@@ -33,42 +33,27 @@ unlink('reports/markdown_report_cache', recursive = TRUE)
 * **Load packages**: load packages and useful scripts for the analysis
 * **Load scripts**: We have written functions to handle much of the Bayesian analysis
 * **Load Bayesian datasets**: The Bayesian approach relies on large simulated datasets from the observed data, for this report we will only present the results graphically from data we have simulated elsewhere. The scripts `bayes_scripts.R`, `bayesian_data_generation.R` and `bayesian_analysis.R` should be able to be run locally if you want to generate your own simulated data. Alternatively you can use the pre-generated data which is stored in the `data_clean\bayesian_models` folder in the github repository [here](https://github.com/DidDrog11/smoking_covid/tree/master) and then you can skip the `bayesian_data_generation.R` step.
-```{r install_packages, include=FALSE}
-library(brms)
-library(ggplot2)
-library(tidybayes)
-library(readr)
-library(dplyr)
-library(tidyr)
-library(ggridges)
-library(glue)
-library(stringr)
-library(forcats)
-library(here)
-library(meta)
-library(snakecase)
-library(flextable)
-library(googlesheets4)
-library(linelist)
-library(DT)
-library(epitools)
-library(ggmap)
+```{r load_packages, include=FALSE, quietly=T}
+source(here::here("scripts", "libraries.R"))
 ```
 
-```{r load_scripts}
+```{r load_dictionary}
 source(here("scripts", "author_dictionary.R"))
 ```
 ## Download data
 ``` {r google_data}
-sheets_id <- as_sheets_id("https://docs.google.com/spreadsheets/d/1yLtpbk29oUKOGceVw2IAJlt9CbbbPWmltzOW_LG6Su8/edit?usp=sharing")
-search_details <- read_sheet(sheets_id, range = 'article_screening')
-data_study_general <- read_sheet(sheets_id, range =  'general_details')
-table_1 <- read_sheet(sheets_id, sheet = 'pop_descriptives')
-table_2 <-  read_sheet(sheets_id, sheet = 'testing')
-table_3 <-  read_sheet(sheets_id, sheet = 'hospitalisation')
-table_4 <-  read_sheet(sheets_id, sheet = 'severity')
-table_5 <-  read_sheet(sheets_id, sheet = 'mortality')
-table_6 <-  read_sheet(sheets_id, sheet = 'updated_quality_appraisal')
+google_api <- rstudioapi::askForSecret("Google API Key")
+register_google(google_api)
+drive_download("https://docs.google.com/spreadsheets/d/1jelIGxrm99QpDKwSoyMUliDJQWtzk4bHsNGDaIjxTaU/edit?usp=sharing", path = here("data_spreadsheet", "data_extraction_current.xlsx"), overwrite = T)
+
+search_details <- readxl::read_xlsx(here("data_spreadsheet", "data_extraction_current.xlsx"), sheet = 'article_screening')
+data_study_general <- readxl::read_xlsx(here("data_spreadsheet", "data_extraction_current.xlsx"), sheet = 'general_details')
+table_1 <- readxl::read_xlsx(here("data_spreadsheet", "data_extraction_current.xlsx"), sheet = 'pop_descriptives')
+table_2 <- readxl::read_xlsx(here("data_spreadsheet", "data_extraction_current.xlsx"), sheet = 'testing')
+table_3 <- readxl::read_xlsx(here("data_spreadsheet", "data_extraction_current.xlsx"), sheet = 'hospitalisation')
+table_4 <- readxl::read_xlsx(here("data_spreadsheet", "data_extraction_current.xlsx"), sheet = 'severity')
+table_5 <- readxl::read_xlsx(here("data_spreadsheet", "data_extraction_current.xlsx"), sheet = 'mortality')
+table_6 <- readxl::read_xlsx(here("data_spreadsheet", "data_extraction_current.xlsx"), sheet = 'updated_quality_appraisal')
 ```
 We maintain a Google sheets document [here](sheets_id) which contains all eligible articles the research team have identified. This is currently viewable only and not open for editing. We have collected the general information for the search in the first sheet, the studies general information in the second, further information on study populations, outcomes of interest and quality of the studies are contained in the further sheets. These sheets are organised in a similar way to the manuscript and so are labelled table_1 to table_6.
 
@@ -80,7 +65,7 @@ We have extracted data from `r nrow(data_study_general)` studies, however, some 
 The first sheet is **Search details**  we use this sheet to keep track of the number of studies found in our search and keep track of the number of titles and abstracts screened and number of papers included in each review version. It presents the data in groups of search periods.
 
 ```{r head_search_details}
-flextable(search_details[,1:12])
+flextable(search_details[,1:13])
 ```
 The second sheet is **General study details** this includes the lead author, where the study is published, the date it was published, the country in which the data originated and the DoI or link to the publication for our records.
 This is a searchable list of all the studies that have met out inclusion and exclusion criteria up until `r paste(max(search_details$date_screened))`. These are live links and should direct to the relevant article, however, some may have been deleted or require institutional access.
@@ -166,8 +151,10 @@ table_1 <- table_1 %>%
   select(lead_author, sample_size, female_sex_percent, data_source, median_age, mean_age, iqr_lower, iqr_upper, standard_deviation, lower_range,
          upper_range, current_smoker, former_smoker, current_former_smoker, never_smoker, never_smoker_unknown, current_vaper, former_vaper,
          current_former_vaper, not_stated, missing, total) %>%
+  mutate(study_id = 1:length(lead_author)) %>%
   filter(!is.na(lead_author)) %>%
-  left_join(., review_details, by = 'lead_author') %>%
+  left_join(., review_details %>%
+              select(-"lead_author"), by = 'study_id') %>%
   write_rds(here::here('data_clean', 'table_1.rds'))
 
 
@@ -175,26 +162,34 @@ table_1 <- table_1 %>%
 
 table_2 <-  table_2 %>%
   clean_data() %>%
+  mutate(study_id = 1:length(lead_author)) %>%
   filter(data_on_testing == TRUE) %>%
-  left_join(., review_details, by = 'lead_author') %>%
+  left_join(., review_details %>%
+              select(-"lead_author"), by = 'study_id') %>%
   write_rds(here::here('data_clean', 'table_2.rds'))
 
 table_3 <-  table_3 %>%
   clean_data() %>%
+  mutate(study_id = 1:length(lead_author)) %>%
   filter(data_on_hospitalisation == TRUE) %>%
-  left_join(., review_details, by = 'lead_author') %>%
+  left_join(., review_details %>%
+              select(-"lead_author"), by = 'study_id') %>%
   write_rds(here::here('data_clean', 'table_3.rds'))
 
 table_4 <-  table_4 %>%
   clean_data() %>%
+  mutate(study_id = 1:length(lead_author)) %>%
   filter(data_disease_severity == TRUE) %>%
-  left_join(., review_details, by = 'lead_author') %>%
+  left_join(., review_details %>%
+              select(-"lead_author"), by = 'study_id') %>%
   write_rds(here::here('data_clean', 'table_4.rds'))
 
 table_5 <- table_5 %>%
   clean_data() %>%
+  mutate(study_id = 1:length(lead_author)) %>%
   filter(data_on_deaths == TRUE) %>%
-  left_join(., review_details, by = 'lead_author') %>%
+  left_join(., review_details %>%
+              select(-"lead_author"), by = 'study_id') %>%
   write_rds(here::here('data_clean', 'table_5.rds'))
 
 
@@ -202,16 +197,18 @@ protect_columns_2 <- !names(table_6) %in% 'lead_author'
 
 table_6 <-  table_6 %>%
   clean_data(protect = protect_columns_2) %>%
+  mutate(study_id = 1:length(lead_author)) %>%
   left_join(., table_1 %>%
-              select(lead_author,
-                     not_stated,
+              select(not_stated,
                      missing,
-                     total),
-                          by = 'lead_author') %>%
+                     total,
+                     study_id),
+                          by = 'study_id') %>%
   mutate(missingness = rowSums(.[8:9], na.rm = T),
          missingness_percentage = (missingness/total)*100) %>% ## Later we want to assess the amount of missingness for each study as it would impact the inclusion of a study into the relevant meta-analyses
   select(-c(not_stated, missing, total, missingness)) %>%
-  left_join(., review_details, by = 'lead_author') %>%
+  left_join(., review_details %>%
+              select(-lead_author), by = 'study_id') %>%
   write_rds(here::here('data_clean', 'table_6.rds'))
 
 a <- data_study_general %>%
@@ -269,6 +266,7 @@ excluded_other_reason <- c("mehra", #retracted
                            )
 
 exclude_from_analysis <- unique(c(superseded_studies, old_isaric, excluded_other_reason))
+write_rds(exclude_from_analysis, here("output_data", "excluded_studies.rds"))
 ```
 We don't want to remove studies from the dataset despite them no longer being included in the analysis. The excluded studies are defined in this chunk of code. We have excluded this version the following studies:
 
@@ -347,35 +345,32 @@ save_as_docx(a, path = here('output_data', 'included_studies.docx'))
 ## The PRISMA diagram will be updated
 The PRISMA reporting guidelines for systematic reviews the guidance is available [here](http://www.prisma-statement.org/). This takes the format of the number of articles obtained from the search from [OVID](https://ovidsp.dc1.ovid.com/sp-4.07.0b/ovidweb.cgi) (login may be needed), [medRxiv](https://www.medrxiv.org/search/text_abstract_title%3Asmoking%2BAND%2BCOVID%20text_abstract_title_flags%3Amatch-all%20jcode%3Amedrxiv%20numresults%3A75%20sort%3Apublication-date%20direction%3Adescending%20format_result%3Astandard), and articles identified by the research team. These are then screened at the title and abstract level. Full texts are then read to extract relevant data, if articles are excluded at this level we describe the reason for this. All of the selected articles will contribute to the narrative synthesis but only those that are judged 'good' or 'fair' quality will be included in the Bayesian meta-analysis.
 ``` {r PRISMA}
-current_total <- search_details %>%
-  select(total_included) %>%
-  sum()
+current_total <- 345
 
-previous_total <- search_details %>%
-  filter(review_version %in% prev_versions) %>%
-  select(total_included) %>%
-  sum()
+previous_total <- 279
 
 prisma <- search_details %>%
   group_by(review_version) %>%
   filter(review_version == current_version) %>%
-  mutate(title_abstract = sum(ovid_number_results, medrxiv_number_results, other_source_included),
-         full_texts_assessed = sum(ovid_screened, medrxiv_screened, other_source_included),
+  mutate(title_abstract = sum(ovid_titles, medrxiv_titles, other_source_included),
+         full_texts_assessed = sum(ovid_abstract_full, medrxiv_abstract_full, other_source_included),
          title_abstract_included = sum(ovid_included, medrxiv_included, other_source_included),
          title_abstract_excluded = title_abstract - full_texts_assessed,
          full_text_excluded = full_texts_assessed-total_included,
+         full_text_included = full_texts_assessed-full_text_excluded,
          previous_total = previous_total,
          previous_minus_superseded = previous_total-superseded,
-         current_total = current_total-superseded) %>%
+         current_total = current_total) %>%
   select("Review version" = review_version,
          "Date Screened" = date_screened,
-         "OVID results" = "ovid_number_results",
-         "medRxiv results" = "medrxiv_number_results",
+         "OVID results" = "ovid_titles",
+         "medRxiv results" = "medrxiv_titles",
          "Other sources" = "other_source_included",
-         "Title/abstracts screened" = "title_abstract",
-         "Title/abstracts excluded" = "title_abstract_excluded",
-         "Full texts assessed" = "full_texts_assessed",
+         "Titles/abstracts screened" = "title_abstract",
+         "Titles/abstracts excluded" = "title_abstract_excluded",
+         "Full texts screened" = "full_texts_assessed",
          "Full texts excluded" = "full_text_excluded",
+         "Records included" = "full_text_included",
          "Records carried forward" = "previous_minus_superseded",
          "Supersed from previous version" = superseded,
          "Studies in narrative synthesis" = "current_total")
@@ -388,11 +383,10 @@ The number of studies contributing to meta-analysis is calculated later.
 As the pandemic continues studies are being reported from an increasing numbers of countries. 
 
 ``` {r countries, cache = TRUE}
-library('ggmap')
 #Countries
 country <- table_1$country %>%
   to_upper_camel_case() %>%
-  recode(., 'Usa' = 'USA', 'Uk' = 'UK', 'SaudiArabia' = 'Saudi Arabia', "SouthKorea" = "South Korea") %>%
+  recode(., 'Usa' = 'USA', 'Uk' = 'UK', 'SaudiArabia' = 'Saudi Arabia', "SouthKorea" = "South Korea", "UnitedArabEmirates" = "United Arab Emirates") %>%
   table() %>%
   as.data.frame() %>%
   arrange(desc(Freq)) %>%
@@ -473,7 +467,7 @@ my_spdf@data$Number[ which(my_spdf@data$Number == 0)] = NA
 my_spdf@data$total_cases[ which(is.na(my_spdf@data$total_cases))] = 0
 
 
-my_bins <- c(0, 1, 5, 10, 20, 30, 40, 80)
+my_bins <- c(0, 1, 5, 10, 20, 50, 70, 100)
 mypalette <- colorBin(palette="YlOrBr", domain=my_spdf@data$Number, na.color="transparent", bins=my_bins)
 
 mytext <- paste(
@@ -554,9 +548,9 @@ study_design <- data_study_general %>%
 * **Summary statistics:** this table will give us the mean, median and IQR of the samples in the review 
 ``` {r numbers}
 #Numbers
-summary(table_1$sample_size)
+summary(as.numeric(table_1$sample_size))
 ```
-* **Total number of participants**: `r paste(sum(table_1$sample_size))`
+* **Total number of participants**: `r paste(sum(as.numeric(table_1$sample_size)))`
 
 ## We want to know if they use a CRF or electronic health record
 The majority of data on smoking outcomes is extracted from electronic health records that are routinely collected in the provision of healthcare. Some of the studies utilise specifically designed Case Report Forms (CRFs). The source of information on smoking status is not always reported.
@@ -649,13 +643,14 @@ datatable(b,
           caption = "Studies providing data on current, former and never smokers") %>%
   formatRound(columns = c(2:5), digits = 0, interval = 3, mark = ",")
 #These are the studies with data on current, former and never smokers
+set_flextable_defaults(digits = 0, big.mark = ",", na_str = "-")
 
 b <- b %>%
   select(-"Study ID") %>%
   flextable() %>%
     set_caption(caption = 'Studies reporting complete smoking status') %>%
-  colformat_num(col_keys = c("Sample size", "Current smokers", "Former smokers", "Never smokers"),
-                digits = 0, na_str = '-', big.mark = ',') %>%
+  colformat_double(j = c("Sample size", "Current smokers", "Former smokers", "Never smokers"),
+                digits = get_flextable_defaults()$digits, big.mark = get_flextable_defaults()$big.mark, na_str = get_flextable_defaults()$na_str) %>%
   set_table_properties(width = 1, layout = 'autofit')
 
 save_as_docx(b, path = here('output_data', 'Supplementary_1a.docx'))
@@ -692,8 +687,8 @@ b <- b %>%
   select(-"Study ID") %>%
   flextable() %>%
     set_caption(caption = 'Studies reporting complete smoking status') %>%
-  colformat_num(col_keys = c("Sample size", "Current/former smokers", "Never smokers"),
-                digits = 0, na_str = '-', big.mark = ',') %>%
+  colformat_double(j = c("Sample size", "Current/former smokers", "Never smokers"),
+                digits = get_flextable_defaults()$digits, big.mark = get_flextable_defaults()$big.mark, na_str = get_flextable_defaults()$na_str) %>%
   set_table_properties(width = 1, layout = 'autofit')
 
 save_as_docx(b, path = here('output_data', 'Supplementary_1b.docx'))
@@ -736,7 +731,7 @@ b <- b %>%
   select(-"Study ID") %>%
   flextable() %>%
     set_caption(caption = 'Studies reporting complete smoking status') %>%
-  colformat_num(col_keys = numeric_names,
+  colformat_double(j = numeric_names,
                 digits = 0, na_str = '-', big.mark = ',') %>%
   set_table_properties(width = 1, layout = 'autofit')
 
@@ -746,7 +741,7 @@ save_as_docx(b, path = here('output_data', 'Supplementary_1c.docx'))
 * **Studies missing key smoking data:** `r paste(nrow(incomplete_smoking_status))`  
 
 # Smoking prevalence by country {.tabset .tabset-fade .tabset-pills}
-``` {r smoking_country}
+``` {r smoking_country, quietly=T}
 
 #Smoking prevalence by country
 country_prevalence_list <- table_1 %>%
@@ -758,6 +753,7 @@ country_prevalence_list <- table_1 %>%
   mutate(never_smoker_percentage = never_smoker/total*100) %>%
   group_split()
 
+source(here("scripts", "smoking_plots.R"))
 ```
 We have split the data into a list where each country can be analysed separately if required.
 
@@ -909,8 +905,8 @@ datatable(a) %>%
 
 a <- flextable(a) %>%
     set_caption(caption = 'Characteristics of included studies') %>%
-  colformat_num(col_keys = numeric_columns, digits = 1, na_str = '-', big.mark = ',') %>%
-  colformat_num(col_keys = 'Sample size', digits = 0, na_str = '-', big.mark = ',') %>%
+  colformat_double(j = numeric_columns, digits = 1, na_str = '-', big.mark = ',') %>%
+  colformat_double(j = 'Sample size', digits = 0, na_str = '-', big.mark = ',') %>%
   set_table_properties(width = 1, layout = 'autofit')
 
 save_as_docx(a, path = here('output_data', 'Table_1.docx'))
@@ -1002,7 +998,7 @@ numeric_columns <- c('Population_tested', 'SARS_CoV_2_negative', 'N_current_smok
                      'P_former_smoker', 'P_current_former_smoker', 'P_never_smoker', 'P_not_stated')
 a <- flextable(a) %>%
     set_caption(caption = 'SARS-CoV-2 infection by smoking status') %>%
-  colformat_num(j = numeric_columns, digits = 0, na_str = '-', big.mark = ',')
+  colformat_double(j = numeric_columns, digits = 0, na_str = '-', big.mark = ',')
 ```
 The number of studies reporting on infection by smoking status is: `r paste(nrow(table_2_word))`
 ``` {r}
@@ -1272,7 +1268,7 @@ numeric_columns <- 'Population'
 
 a <- flextable(a) %>%
     set_caption(caption = 'COVID-19 hospitalisation by smoking status') %>%
-  colformat_num(col_keys = numeric_columns, digits = 0, na_str = '-', big.mark = ',') %>%
+  colformat_double(j = numeric_columns, digits = 0, na_str = '-', big.mark = ',') %>%
   colformat_char(na_str = '-')
 
 a <- set_header_labels(a,
@@ -1500,7 +1496,7 @@ numeric_columns <- 'Population'
 
 a <- flextable(a) %>%
     set_caption(caption = 'COVID-19 severity by smoking status') %>%
-  colformat_num(col_keys = numeric_columns, digits = 0, na_str = '-', big.mark = ',') %>%
+  colformat_double(j = numeric_columns, digits = 0, na_str = '-', big.mark = ',') %>%
   colformat_char(na_str = '-')
 
 a <- set_header_labels(a,
@@ -1731,7 +1727,7 @@ numeric_columns <- 'Population'
 
 a <- flextable(a) %>%
     set_caption(caption = 'COVID-19 mortality by smoking status') %>%
-  colformat_num(col_keys = numeric_columns, digits = 0, na_str = '-', big.mark = ',') %>%
+  colformat_double(j = numeric_columns, digits = 0, na_str = '-', big.mark = ',') %>%
   colformat_char(na_str = '-')
 
 a <- set_header_labels(a,
@@ -1912,7 +1908,7 @@ save_as_docx(a, path = here('output_data', 'Supplementary_2.docx'))
 
 ``` {r supplementary_country}
 
-country_smoking <-  read_sheet(sheets_id, sheet = 'national_smoking_prevalence') %>%
+country_smoking <-  readxl::read_xlsx(here("data_spreadsheet", "data_extraction_current.xlsx"), sheet = 'national_smoking_prevalence') %>%
   flextable()
 save_as_docx(country_smoking, path = here('output_data', 'Supplementary_3.docx'))
 ```

@@ -104,7 +104,7 @@ current_testing_alternative_prior <- forest_plot(
   pooled_draw_m1_a,
   cut = 4,
   "Forest plot of current smokers and risk of testing positive",
-  "v8 testing prior",
+  "v9 testing prior",
   "m1_a.png"
 )
 
@@ -173,7 +173,7 @@ former_testing_alternative_prior <- forest_plot(
   pooled_draw_m2_a,
   cut = 3,
   "Forest plot of former smokers and risk of testing positive",
-  "v8 testing prior",
+  "v9 testing prior",
   "m2_a.png"
 )
 
@@ -211,13 +211,22 @@ m3_a_hh_ecdf <- ecdf(exp(post_samples_m3_a_hh$TE))
 1-m3_a_hh_ecdf(1.1) #high heterogeneity
 
 
-study_draws_m3 <- study_draw(m3)
+study_draws_m3 <- study_draw(m3) %>%
+mutate(review_version = as.character(review_version),
+       review_version = ifelse(is.na(review_version), "current", review_version),
+       review_version = as_factor(review_version))
 pooled_draw_m3 <- pooled_effect_draw(m3)
 
-study_draws_m3_a <- study_draw(m3_a)
+study_draws_m3_a <- study_draw(m3_a)  %>%
+  mutate(review_version = as.character(review_version),
+         review_version = ifelse(is.na(review_version), "current", review_version),
+         review_version = as_factor(review_version))
 pooled_draw_m3_a <- pooled_effect_draw(m3_a)
 
-study_draws_m3_a_hh <- study_draw(m3_a_hh)
+study_draws_m3_a_hh <- study_draw(m3_a_hh)  %>%
+  mutate(review_version = as.character(review_version),
+         review_version = ifelse(is.na(review_version), "current", review_version),
+         review_version = as_factor(review_version))
 pooled_draw_m3_a_hh <- pooled_effect_draw(m3_a_hh)
 
 current_hospitalisation_minimal_prior <- forest_plot(
@@ -236,7 +245,7 @@ current_hospitalisation_alternative_prior <- forest_plot(
   pooled_draw_m3_a,
   cut = 3,
   "Forest plot of current smokers and risk of hospital admission",
-  "v8 hospitalisation prior",
+  "v9 hospitalisation prior",
   "m3_a.png"
 )
 
@@ -261,7 +270,6 @@ median_hdci(post_samples_m3_a$tau)
 # Former smokers hospitalisation --------------------------------------------------
 # Bayesian analysis for former smokers and hospitalisation for SARS-CoV-2
 
-
 post_samples_m4 <- post_samples(m4)
 post_samples_m4_a <- post_samples(m4_a)
 post_samples_m4_a_hh <- post_samples(m4_a_hh)
@@ -275,13 +283,22 @@ m4_a_hh_ecdf <- ecdf(exp(post_samples_m4_a_hh$TE))
 1-m4_a_hh_ecdf(1.1) #high heterogeneity
 
 
-study_draws_m4 <- study_draw(m4)
+study_draws_m4 <- study_draw(m4)  %>%
+  mutate(review_version = as.character(review_version),
+         review_version = ifelse(is.na(review_version), "current", review_version),
+         review_version = as_factor(review_version))
 pooled_draw_m4 <- pooled_effect_draw(m4)
 
-study_draws_m4_a <- study_draw(m4_a)
+study_draws_m4_a <- study_draw(m4_a)  %>%
+  mutate(review_version = as.character(review_version),
+         review_version = ifelse(is.na(review_version), "current", review_version),
+         review_version = as_factor(review_version))
 pooled_draw_m4_a <- pooled_effect_draw(m4_a)
 
-study_draws_m4_a_hh <- study_draw(m4_a_hh)
+study_draws_m4_a_hh <- study_draw(m4_a_hh)  %>%
+  mutate(review_version = as.character(review_version),
+         review_version = ifelse(is.na(review_version), "current", review_version),
+         review_version = as_factor(review_version))
 pooled_draw_m4_a_hh <- pooled_effect_draw(m4_a_hh)
 
 former_hospitalisation_minimal_prior <- forest_plot(
@@ -300,7 +317,7 @@ former_hospitalisation_alternative_prior <- forest_plot(
   pooled_draw_m4_a,
   cut = 3,
   "Forest plot of former smokers and risk of hospital admission",
-  "v8 hospitalisation prior",
+  "v9 hospitalisation prior",
   "m4_a.png"
 )
 
@@ -367,7 +384,7 @@ current_severity_alternative_prior <- forest_plot(
   pooled_draw_m5_a,
   cut = 3,
   "Forest plot of current smokers and risk of severe disease",
-  "v8 severity prior",
+  "v9 severity prior",
   "m5_a.png"
 )
 
@@ -433,7 +450,7 @@ former_severity_alternative_prior <- forest_plot(
   pooled_draw_m6_a,
   cut = 4,
   "Forest plot of former smokers and risk of severe disease",
-  "v8 severity prior",
+  "v9 severity prior",
   "m6_a.png"
 )
 
@@ -509,7 +526,7 @@ current_mortality_alternative_prior <- forest_plot(
   pooled_draw_m7_a,
   cut = 5,
   "Forest plot of current smokers and mortality",
-  "v8 mortality prior",
+  "v9 mortality prior",
   "m7_a.png"
 )
 
@@ -585,7 +602,7 @@ former_mortality_alternative_prior <- forest_plot(
   pooled_draw_m8_a,
   cut = 5,
   "Forest plot of former smokers and mortality",
-  "v8 mortality prior",
+  "v9 mortality prior",
   "m8_a.png"
 )
 

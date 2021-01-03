@@ -16,9 +16,9 @@ source(here("scripts", "bayes_scripts.R"))
 source(here("scripts", "author_dictionary.R"))
 
 data_study_general <- readRDS(here("data_clean", "data_study_general.rds"))
-                              
-previous_review_versions <- prev_versions
-current_review_version <- current_version
+versions <- as_data_frame(read_rds(here("data_clean", "versioning.rds")))
+previous_review_versions <- unique(versions$prev_versions)
+current_review_version <- unique(versions$current_version)
 
 study_review_version <- data_study_general %>%
   mutate(lead_author = to_upper_camel_case(lead_author, sep_out = ", "),
@@ -66,54 +66,54 @@ minimally_informative_prior <-
 
 # Previous meta-analysis guided priors
 current_testing_prior <-
-  c(prior(normal(-.329, 1), class = Intercept),
+  c(prior(normal(-.371, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_testing_prior <-
-  c(prior(normal(0.02, 1), class = Intercept),
+  c(prior(normal(0.0198, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 current_hospitalisation_prior <-
-  c(prior(normal(0.058, 1), class = Intercept),
+  c(prior(normal(0.0582, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_hospitalisation_prior <-
-  c(prior(normal(0.17, 1), class = Intercept),
+  c(prior(normal(0.157, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 current_severity_prior <-
-  c(prior(normal(0.23, 1), class = Intercept),
+  c(prior(normal(0.231, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_severity_prior <-
   c(prior(normal(0.419, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 current_mortality_prior <-
-  c(prior(normal(0.095, 1), class = Intercept),
+  c(prior(normal(0.0487, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_mortality_prior <- 
-  c(prior(normal(0.30, 1), class = Intercept),
+  c(prior(normal(0.329, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 
 # Classical meta-analysis guided priors with high heterogeneity
 current_testing_prior_hh <-
-  c(prior(normal(-.329, 1), class = Intercept),
+  c(prior(normal(-.371, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd))
 former_testing_prior_hh <-
-  c(prior(normal(0.02, 1), class = Intercept),
+  c(prior(normal(0.0198, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd))
 current_hospitalisation_prior_hh <-
-  c(prior(normal(0.058, 1), class = Intercept),
+  c(prior(normal(0.0582, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 former_hospitalisation_prior_hh <-
-  c(prior(normal(0.17, 1), class = Intercept),
+  c(prior(normal(0.157, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 current_severity_prior_hh <-
-  c(prior(normal(0.23, 1), class = Intercept),
+  c(prior(normal(0.231, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 former_severity_prior_hh <-
   c(prior(normal(0.419, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd))
 current_mortality_prior_hh <-
-  c(prior(normal(0.095, 1), class = Intercept),
+  c(prior(normal(0.0487, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 former_mortality_prior_hh <- 
-  c(prior(normal(0.30, 1), class = Intercept),
+  c(prior(normal(0.329, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 
 
@@ -165,6 +165,7 @@ ranef(m2_a_hh)
 write_rds(m2, here("data_clean", "bayesian_models", "testing_former_m2.rds"))
 write_rds(m2_a, here("data_clean", "bayesian_models", "testing_former_m2_a.rds"))
 write_rds(m2_a_hh, here("data_clean", "bayesian_models", "testing_former_m2_a_hh.rds"))
+
 ##Hospitalisation current
 m3 <-
   bayes_test(hospital_bayes_c, minimally_informative_prior, iterations = 40000)
@@ -183,6 +184,10 @@ m3_a_hh <-
 pp_check(m3_a_hh)
 summary(m3_a_hh)
 ranef(m3_a_hh)
+
+write_rds(m3, here("data_clean", "bayesian_models", "hospitalisation_current_m3.rds"))
+write_rds(m3_a, here("data_clean", "bayesian_models", "hospitalisation_current_m3_a.rds"))
+write_rds(m3_a_hh, here("data_clean", "bayesian_models", "hospitalisation_current_m3_a_hh.rds"))
 
 ##Hospitalisation former
 m4 <-
@@ -203,6 +208,10 @@ pp_check(m4_a_hh)
 summary(m4_a_hh)
 ranef(m4_a_hh)
 
+write_rds(m4, here("data_clean", "bayesian_models", "hospitalisation_former_m4.rds"))
+write_rds(m4_a, here("data_clean", "bayesian_models", "hospitalisation_former_m4_a.rds"))
+write_rds(m4_a_hh, here("data_clean", "bayesian_models", "hospitalisation_former_m4_a_hh.rds"))
+
 ##Severity current
 m5 <-
   bayes_test(severity_bayes_c, minimally_informative_prior, iterations = 40000)
@@ -221,6 +230,10 @@ m5_a_hh <-
 pp_check(m5_a_hh)
 summary(m5_a_hh)
 ranef(m5_a_hh)
+
+write_rds(m5, here("data_clean", "bayesian_models", "severity_current_m5.rds"))
+write_rds(m5_a, here("data_clean", "bayesian_models", "severity_current_m5_a.rds"))
+write_rds(m5_a_hh, here("data_clean", "bayesian_models", "severity_current_m5_a_hh.rds"))
 
 ##Severity former
 m6 <-
@@ -241,6 +254,10 @@ pp_check(m6_a_hh)
 summary(m6_a_hh)
 ranef(m6_a_hh)
 
+write_rds(m6, here("data_clean", "bayesian_models", "severity_former_m6.rds"))
+write_rds(m6_a, here("data_clean", "bayesian_models", "severity_former_m6_a.rds"))
+write_rds(m6_a_hh, here("data_clean", "bayesian_models", "severity_former_m6_a_hh.rds"))
+
 ##Mortality current
 m7 <-
   bayes_test(mortality_bayes_c, minimally_informative_prior, iterations = 40000)
@@ -259,6 +276,10 @@ m7_a_hh <-
 pp_check(m7_a_hh)
 summary(m7_a_hh)
 ranef(m7_a_hh)
+
+write_rds(m7, here("data_clean", "bayesian_models", "mortality_current_m7.rds"))
+write_rds(m7_a, here("data_clean", "bayesian_models", "mortality_current_m7_a.rds"))
+write_rds(m7_a_hh, here("data_clean", "bayesian_models", "mortality_current_m7_a_hh.rds"))
 
 ##Mortality former
 m8 <-
@@ -279,22 +300,6 @@ pp_check(m8_a_hh)
 summary(m8_a_hh)
 ranef(m8_a_hh)
 
-
-write_rds(m3, here("data_clean", "bayesian_models", "hospitalisation_current_m3.rds"))
-write_rds(m3_a, here("data_clean", "bayesian_models", "hospitalisation_current_m3_a.rds"))
-write_rds(m3_a_hh, here("data_clean", "bayesian_models", "hospitalisation_current_m3_a_hh.rds"))
-write_rds(m4, here("data_clean", "bayesian_models", "hospitalisation_former_m4.rds"))
-write_rds(m4_a, here("data_clean", "bayesian_models", "hospitalisation_former_m4_a.rds"))
-write_rds(m4_a_hh, here("data_clean", "bayesian_models", "hospitalisation_former_m4_a_hh.rds"))
-write_rds(m5, here("data_clean", "bayesian_models", "severity_current_m5.rds"))
-write_rds(m5_a, here("data_clean", "bayesian_models", "severity_current_m5_a.rds"))
-write_rds(m5_a_hh, here("data_clean", "bayesian_models", "severity_current_m5_a_hh.rds"))
-write_rds(m6, here("data_clean", "bayesian_models", "severity_former_m6.rds"))
-write_rds(m6_a, here("data_clean", "bayesian_models", "severity_former_m6_a.rds"))
-write_rds(m6_a_hh, here("data_clean", "bayesian_models", "severity_former_m6_a_hh.rds"))
-write_rds(m7, here("data_clean", "bayesian_models", "mortality_current_m7.rds"))
-write_rds(m7_a, here("data_clean", "bayesian_models", "mortality_current_m7_a.rds"))
-write_rds(m7_a_hh, here("data_clean", "bayesian_models", "mortality_current_m7_a_hh.rds"))
 write_rds(m8, here("data_clean", "bayesian_models", "mortality_former_m8.rds"))
 write_rds(m8_a, here("data_clean", "bayesian_models", "mortality_former_m8_a.rds"))
 write_rds(m8_a_hh, here("data_clean", "bayesian_models", "mortality_former_m8_a_hh.rds"))

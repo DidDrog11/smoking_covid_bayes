@@ -1,0 +1,25 @@
+---
+title: "test"
+author: "David"
+date: "27/01/2021"
+output: html_document
+bibliography: manuscript.bib
+---
+``` {r, echo = F}
+library("tidyverse")
+library("flextable")
+library("ftExtra")
+tbl_1 <- readRDS(here::here("data_clean", "table_1_refs.rds"))[1:2,]
+
+refs <- c("[@guan_clinical_2020]",
+          "[@guan_comorbidity_2020]")
+
+tbl_1 <- tbl_1 %>%
+  mutate(ref = refs)
+
+tbl_1 %>%
+  flextable() %>%
+  colformat_md()
+```
+
+# **References**

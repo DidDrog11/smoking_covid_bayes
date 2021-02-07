@@ -40,7 +40,7 @@ cleaned_names <- c('Chow, Us, Cdc',
                    "O, Reilly",
                    "Bermejo, Martin",
                    "Marquez, Salinas",
-                   "Diez, Manglanas",
+                   "Diez, Manglano",
                    "Martinez, Lacalzada",
                    "O, Gallagher",
                    "Vila, Corcoles, Statue, Gracia")

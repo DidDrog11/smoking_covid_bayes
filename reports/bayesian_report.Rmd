@@ -623,6 +623,11 @@ This graph is for former smoking prevalence. The data is more sparse for this ex
 
 ## Table 1: Included studies
 ``` {r table_1}
+#table 1 for references
+table_1_refs <- table_1 %>%
+  left_join(., data_study_general %>%
+              select(lead_author, doi),
+            by = "lead_author")
 #Updating table 1
 table_1_word <- table_1 %>%
   mutate(., current_percentage = current_smoker/total*100,
@@ -715,6 +720,9 @@ a <- a %>%
   select(-mean_used) %>%
   mutate(median_mean = ifelse(median_mean == 'NA', 'NA', paste(paste(median_mean, iqr, sep = ' ('),')', sep = ''))) %>%
   select(-iqr) %>%
+  left_join(., table_1_refs %>%
+              select(lead_author, doi),
+            by = "lead_author") %>%
   rename('Study ID' = study_id,
          'Lead author' = lead_author,
          'Date published' = date_published,
@@ -747,8 +755,12 @@ a$`Country` <- a$Country %>%
 numeric_columns <- c('Median (IQR)', 'Female %', 'Current smoker %','Former smokers %', 'Current/former smokers %',
                      'Never smokers %', 'Never/unknown smokers %', 'Missing %')
 
-saveRDS(a, file = here("data_clean", "table_1_refs.rds"))
-source(here("scripts", "references_in_table.r"))
+saveRDS(a %>%
+          select(doi, everything()) %>%
+          select(-"Study ID") %>%
+          rename("ref" = doi),
+        file = here("data_clean", "table_1_refs.rds"))
+#source(here("scripts", "references_in_table.r"))
 ```
 The total number of included studies is `r paste(nrow(table_1_word))`. This table is searchable
 ```{r}
@@ -851,13 +863,18 @@ a$Author  <- a$Author  %>%
   recode("Bello, Chavolla" = "Bello-Chavolla",
          "De, Lusignan" = "de Lusignan",
          "Del, Valle" = "del Valle")
+a$Author <- to_upper_camel_case(a$`Lead author`, sep_out = ", ")
+author_list <- plyr::mapvalues(a$Author,
+                               from = cleaned_names,
+                               to = correct_names)
+
+a$Author <- author_list
 
 numeric_columns <- c('Population_tested', 'SARS_CoV_2_negative', 'N_current_smoker', 'N_former_smoker',
                      'N_current_former_smoker', 'N_never_smoker', 'N_not_stated', 'SARS_CoV_2_positive', 'P_current_smoker',
                      'P_former_smoker', 'P_current_former_smoker', 'P_never_smoker', 'P_not_stated')
 a <- flextable(a) %>%
-    set_caption(caption = 'SARS-CoV-2 infection by smoking status') %>%
-  colformat_double(j = numeric_columns, digits = 0, na_str = '-', big.mark = ',')
+    colformat_double(j = numeric_columns, digits = 0, na_str = '-', big.mark = ',')
 ```
 The number of studies reporting on infection by smoking status is: `r paste(nrow(table_2_word))`
 ``` {r}
@@ -900,10 +917,10 @@ included_studies <- quality_table_2 %>%
   filter(!lead_author %in% c("reiter", "hippisley_cox", "ullah"))
 
 good_quality_2 <- quality_table_2 %>%
-  filter(overall_quality != 'good')
+  filter(overall_quality == 'good')
 
 fair_quality_2 <- quality_table_2 %>%
-  filter(overall_quality != 'fair')
+  filter(overall_quality == 'fair')
 
 meta <- tibble('author' = table_2$lead_author,
                'negative_smoker' = table_2$negative_current_smoker,
@@ -1133,7 +1150,6 @@ a$Author <- plyr::mapvalues(a$Author,
 numeric_columns <- 'Population'
 
 a <- flextable(a) %>%
-    set_caption(caption = 'COVID-19 hospitalisation by smoking status') %>%
   colformat_double(j = numeric_columns, digits = 0, na_str = '-', big.mark = ',') %>%
   colformat_char(na_str = '-')
 
@@ -1365,7 +1381,6 @@ a$Author <- plyr::mapvalues(a$Author,
 numeric_columns <- 'Population'
 
 a <- flextable(a) %>%
-    set_caption(caption = 'COVID-19 severity by smoking status') %>%
   colformat_double(j = numeric_columns, digits = 0, na_str = '-', big.mark = ',') %>%
   colformat_char(na_str = '-')
 
@@ -1603,7 +1618,6 @@ a$Author <- plyr::mapvalues(a$Author,
 numeric_columns <- 'Population'
 
 a <- flextable(a) %>%
-    set_caption(caption = 'COVID-19 mortality by smoking status') %>%
   colformat_double(j = numeric_columns, digits = 0, na_str = '-', big.mark = ',') %>%
   colformat_char(na_str = '-')
 

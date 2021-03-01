@@ -55,8 +55,8 @@ forest_plot <- function(model, data_study, data_pooled, cut, title, type, filena
   forest_data$review_version <- plyr::mapvalues(forest_data$review_version, from = c("previous",
                                                                                      "current",
                                                                                      "combined_pooled"),
-                                                to = c("Previous version (v9)",
-                                                       "Current version (v10)",
+                                                to = c(paste("Previous version ", "(", tail(previous_review_versions, 1), ")", sep = ""),
+                                                       paste("Current version ", "(",current_version, ")", sep = ""),
                                                        "Pooled effect"))
   summary_forest <- group_by(forest_data, Author, review_version) %>%
     median_qi(b_Intercept)

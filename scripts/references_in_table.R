@@ -9,8 +9,7 @@ tbl_1 <- readRDS(here::here("data_clean", "table_1_refs.rds")) %>%
 bib <- bib2df(here::here("reports", "manuscript.bib")) %>%
   select(BIBTEXKEY, DOI)
 
-tbl_1 %<>%
-  left_join(., bib %>%
+tbl_1 <- left_join(tbl_1, bib %>%
               rename("ref" = DOI),
             by = "ref") %>%
   mutate(ref = paste("@", BIBTEXKEY, sep = "")) %>%

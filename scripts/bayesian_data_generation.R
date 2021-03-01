@@ -69,25 +69,25 @@ current_testing_prior <-
   c(prior(normal(-.371, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_testing_prior <-
-  c(prior(normal(0.0198, 1), class = Intercept),
+  c(prior(normal(0.0296, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 current_hospitalisation_prior <-
-  c(prior(normal(0.0582, 1), class = Intercept),
+  c(prior(normal(0.0770, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_hospitalisation_prior <-
-  c(prior(normal(0.157, 1), class = Intercept),
+  c(prior(normal(0.1655, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 current_severity_prior <-
-  c(prior(normal(0.231, 1), class = Intercept),
+  c(prior(normal(0.2311, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_severity_prior <-
-  c(prior(normal(0.419, 1), class = Intercept),
+  c(prior(normal(0.4187, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 current_mortality_prior <-
   c(prior(normal(0.0487, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 former_mortality_prior <- 
-  c(prior(normal(0.329, 1), class = Intercept),
+  c(prior(normal(0.3365, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 
 # Classical meta-analysis guided priors with high heterogeneity
@@ -95,25 +95,25 @@ current_testing_prior_hh <-
   c(prior(normal(-.371, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd))
 former_testing_prior_hh <-
-  c(prior(normal(0.0198, 1), class = Intercept),
+  c(prior(normal(0.0296, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd))
 current_hospitalisation_prior_hh <-
-  c(prior(normal(0.0582, 1), class = Intercept),
+  c(prior(normal(0.0770, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 former_hospitalisation_prior_hh <-
-  c(prior(normal(0.157, 1), class = Intercept),
+  c(prior(normal(0.1655, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 current_severity_prior_hh <-
-  c(prior(normal(0.231, 1), class = Intercept),
+  c(prior(normal(0.2311, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 former_severity_prior_hh <-
-  c(prior(normal(0.419, 1), class = Intercept),
+  c(prior(normal(0.4187, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd))
 current_mortality_prior_hh <-
   c(prior(normal(0.0487, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 former_mortality_prior_hh <- 
-  c(prior(normal(0.329, 1), class = Intercept),
+  c(prior(normal(0.3365, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd)) 
 
 
@@ -121,11 +121,11 @@ former_mortality_prior_hh <-
 # Run models --------------------------------------------------------------
 
 ##Testing current
-# m1 <-
-#   bayes_test(testing_bayes_c, minimally_informative_prior, iterations = 40000)
-# pp_check(m1)
-# summary(m1)
-# ranef(m1)
+m1 <-
+  bayes_test(testing_bayes_c, minimally_informative_prior, iterations = 40000)
+pp_check(m1)
+summary(m1)
+ranef(m1)
 
 m1_a <-
   bayes_test(testing_bayes_c, current_testing_prior, iterations = 40000)
@@ -139,7 +139,7 @@ ranef(m1_a)
 # summary(m1_a_hh)
 # ranef(m1_a_hh)
 
-# write_rds(m1, here("data_clean", "bayesian_models", "testing_current_m1.rds"))
+write_rds(m1, here("data_clean", "bayesian_models", "testing_current_m1.rds"))
 write_rds(m1_a, here("data_clean", "bayesian_models", "testing_current_m1_a.rds"))
 # write_rds(m1_a_hh, here("data_clean", "bayesian_models", "testing_current_m1_a_hh.rds"))
 

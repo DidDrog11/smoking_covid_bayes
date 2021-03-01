@@ -20,10 +20,10 @@ linelist
 DT
 epitools
 ggmap
+gtsummary
+bib2df
+ftExtra
 sp
 rgdal
 leaflet
 coronavirus
-gtsummary
-bib2df
-ftExtra

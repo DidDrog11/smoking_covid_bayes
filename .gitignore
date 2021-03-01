@@ -4,3 +4,4 @@
 .Ruserdata
 data_clean/
 output_data/
+.RDataTmp

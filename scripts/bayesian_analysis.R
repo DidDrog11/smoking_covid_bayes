@@ -33,7 +33,7 @@ study_review_version <- data_study_general %>%
 levels(study_review_version$review_version) <- c(levels(study_review_version$review_version), "combined_pooled") %>%
   fct_relevel(c("previous", "current", "combined_pooled"))
 
-#m1 <- read_rds(here("data_clean", "bayesian_models", "testing_current_m1.rds"))
+m1 <- read_rds(here("data_clean", "bayesian_models", "testing_current_m1.rds"))
 m1_a <- read_rds(here("data_clean", "bayesian_models", "testing_current_m1_a.rds"))
 #m1_a_hh <- read_rds(here("data_clean", "bayesian_models", "testing_current_m1_a_hh.rds"))
 #m2 <- read_rds(here("data_clean", "bayesian_models", "testing_former_m2.rds"))
@@ -74,13 +74,15 @@ m1_a_ecdf(0.9) #informative
 #m1_a_hh_ecdf(0.9) #high heterogeneity
 
 # study_draws_m1 <- study_draw(m1) %>%
-#   mutate(Author = ifelse(Author == "Merkely", "Merkely*",
-#                          ifelse(Author == "Carrat", "Carrat*", Author)))
+#  mutate(Author = ifelse(Author == "Merkely", "Merkely*",
+#                         ifelse(Author == "Carrat", "Carrat*",
+#                                ifelse(Author == "Richard", "Richard*", Author))))
 # pooled_draw_m1 <- pooled_effect_draw(m1)
 
 study_draws_m1_a <- study_draw(m1_a) %>%
   mutate(Author = ifelse(Author == "Merkely", "Merkely*",
-                         ifelse(Author == "Carrat", "Carrat*", Author)))
+                         ifelse(Author == "Carrat", "Carrat*",
+                                ifelse(Author == "Richard", "Richard*", Author))))
 pooled_draw_m1_a <- pooled_effect_draw(m1_a)
 
 # study_draws_m1_a_hh <- study_draw(m1_a_hh) %>%
@@ -89,13 +91,13 @@ pooled_draw_m1_a <- pooled_effect_draw(m1_a)
 # pooled_draw_m1_a_hh <- pooled_effect_draw(m1_a_hh)
 
 # current_testing_minimal_prior <- forest_plot(
-#   m1,
-#   study_draws_m1,
-#   pooled_draw_m1,
-#   cut = 4,
-#   "Forest plot of current smokers and risk of testing positive",
-#   "Minimally informative prior",
-#   "m1.png"
+#  m1,
+#  study_draws_m1,
+#  pooled_draw_m1,
+#  cut = 4,
+#  "Forest plot of current smokers and risk of testing positive",
+#  "Minimally informative prior",
+#  "m1.png"
 # )
 
 current_testing_alternative_prior <- forest_plot(
@@ -104,7 +106,7 @@ current_testing_alternative_prior <- forest_plot(
   pooled_draw_m1_a,
   cut = 4,
   "Forest plot of current smokers and risk of testing positive",
-  "v9 testing prior",
+  paste(tail(previous_review_versions, 1), "testing prior"),
   "m1_a.png"
 )
 
@@ -149,7 +151,8 @@ m2_a_ecdf <- ecdf(exp(post_samples_m2_a$TE))
 
 study_draws_m2_a <- study_draw(m2_a) %>%
   mutate(Author = ifelse(Author == "Merkely", "Merkely*",
-                         ifelse(Author == "Carrat", "Carrat*", Author)))
+                         ifelse(Author == "Carrat", "Carrat*",
+                                ifelse(Author == "Richard", "Richard*", Author))))
 pooled_draw_m2_a <- pooled_effect_draw(m2_a)
 
 # study_draws_m2_a_hh <- study_draw(m2_a_hh) %>%
@@ -173,7 +176,7 @@ former_testing_alternative_prior <- forest_plot(
   pooled_draw_m2_a,
   cut = 3,
   "Forest plot of former smokers and risk of testing positive",
-  "v9 testing prior",
+  paste(tail(previous_review_versions, 1), "testing prior"),
   "m2_a.png"
 )
 
@@ -245,7 +248,7 @@ current_hospitalisation_alternative_prior <- forest_plot(
   pooled_draw_m3_a,
   cut = 3,
   "Forest plot of current smokers and risk of hospital admission",
-  "v9 hospitalisation prior",
+  paste(tail(previous_review_versions, 1), "hospitalisation prior"),
   "m3_a.png"
 )
 
@@ -316,7 +319,7 @@ former_hospitalisation_alternative_prior <- forest_plot(
   pooled_draw_m4_a,
   cut = 3,
   "Forest plot of former smokers and risk of hospital admission",
-  "v9 hospitalisation prior",
+  paste(tail(previous_review_versions, 1), "hospitalisation prior"),
   "m4_a.png"
 )
 
@@ -382,7 +385,7 @@ current_severity_alternative_prior <- forest_plot(
   pooled_draw_m5_a,
   cut = 3,
   "Forest plot of current smokers and risk of severe disease",
-  "v9 severity prior",
+  paste(tail(previous_review_versions, 1), "severity prior"),
   "m5_a.png"
 )
 
@@ -447,7 +450,7 @@ former_severity_alternative_prior <- forest_plot(
   pooled_draw_m6_a,
   cut = 4,
   "Forest plot of former smokers and risk of severe disease",
-  "v9 severity prior",
+  paste(tail(previous_review_versions, 1), "severity prior"),
   "m6_a.png"
 )
 
@@ -523,7 +526,7 @@ current_mortality_alternative_prior <- forest_plot(
   pooled_draw_m7_a,
   cut = 5,
   "Forest plot of current smokers and mortality",
-  paste(current_version, "mortality prior", sep = " "),
+  paste(tail(previous_review_versions, 1), "mortality prior"),
   "m7_a.png"
 )
 
@@ -599,7 +602,7 @@ former_mortality_alternative_prior <- forest_plot(
   pooled_draw_m8_a,
   cut = 5,
   "Forest plot of former smokers and mortality",
-  "v9 mortality prior",
+  paste(tail(previous_review_versions, 1), "mortality prior"),
   "m8_a.png"
 )
 
@@ -626,129 +629,25 @@ ecdf_list <- list(m1_a_ecdf, m2_a_ecdf, m3_a_ecdf, m4_a_ecdf, m5_a_ecdf, m6_a_ec
 write_rds(ecdf_list, here("data_clean", "bayesian_models", "ecdf_list.RDS"))
 
 #  Tau heterogeneity ------------------------------------------------------
-median_hdci(post_samples_m1_a$tau)
-median_hdci(post_samples_m2_a$tau)
-median_hdci(post_samples_m3_a$tau)
-median_hdci(post_samples_m4_a$tau)
-median_hdci(post_samples_m5_a$tau)
-median_hdci(post_samples_m6_a$tau)
-median_hdci(post_samples_m7_a$tau)
-median_hdci(post_samples_m8_a$tau)
+tau <- rbind(
+  median_hdci(post_samples_m1_a$tau),
+  median_hdci(post_samples_m2_a$tau),
+  median_hdci(post_samples_m3_a$tau),
+  median_hdci(post_samples_m4_a$tau),
+  median_hdci(post_samples_m5_a$tau),
+  median_hdci(post_samples_m6_a$tau),
+  median_hdci(post_samples_m7_a$tau),
+  median_hdci(post_samples_m8_a$tau))
 
-# Results summaries
-# Current
-current_testing_RR_value <- current_testing_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(b_Intercept)
-current_testing_lci <- current_testing_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.lower)
-current_testing_uci <- current_testing_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.upper)
-current_testing_tau <- median_hdci(post_samples_m1_a$tau) %>%
-  select(y)
-former_testing_RR_value <- former_testing_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(b_Intercept)
-former_testing_lci <- former_testing_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.lower)
-former_testing_uci <- former_testing_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.upper)
-former_testing_tau <- median_hdci(post_samples_m2_a$tau) %>%
-  select(y)
-#Hospitalisation
-current_hospitalisation_RR_value <- current_hospitalisation_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(b_Intercept)
-current_hospitalisation_lci <- current_hospitalisation_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.lower)
-current_hospitalisation_uci <- current_hospitalisation_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.upper)
-current_hospitalisation_tau <- median_hdci(post_samples_m3_a$tau) %>%
-  select(y)
-former_hospitalisation_RR_value <- former_hospitalisation_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(b_Intercept)
-former_hospitalisation_lci <- former_hospitalisation_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.lower)
-former_hospitalisation_uci <- former_hospitalisation_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.upper)
-former_hospitalisation_tau <- median_hdci(post_samples_m4_a$tau) %>%
-  select(y)
-#Severity
-current_severity_RR_value <- current_severity_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(b_Intercept)
-current_severity_lci <- current_severity_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.lower)
-current_severity_uci <- current_severity_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.upper)
-current_severity_tau <- median_hdci(post_samples_m5_a$tau) %>%
-  select(y)
-former_severity_RR_value <- former_severity_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(b_Intercept)
-former_severity_lci <- former_severity_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.lower)
-former_severity_uci <- former_severity_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.upper)
-former_severity_tau <- median_hdci(post_samples_m6_a$tau) %>%
-  select(y)
-#Mortality
-current_mortality_RR_value <- current_mortality_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(b_Intercept)
-current_mortality_lci <- current_mortality_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.lower)
-current_mortality_uci <- current_mortality_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.upper)
-current_mortality_tau <- median_hdci(post_samples_m7_a$tau) %>%
-  select(y)
-former_mortality_RR_value <- former_mortality_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(b_Intercept)
-former_mortality_lci <- former_mortality_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.lower)
-former_mortality_uci <- former_mortality_alternative_prior$summary %>%
-  ungroup() %>%
-  filter(Author == "Pooled Effect") %>%
-  select(.upper)
-former_mortality_tau <- median_hdci(post_samples_m8_a$tau) %>%
-  select(y)
+write_rds(tau, here("output_data", "tau.rds"))
+# Export summary ----------------------------------------------------------
+
+write_rds(current_testing_alternative_prior, here("output_data", "current_testing_alternative.rds"))
+write_rds(former_testing_alternative_prior, here("output_data", "former_testing_alternative.rds"))
+write_rds(current_hospitalisation_alternative_prior, here("output_data", "current_hospitalisation_alternative.rds"))
+write_rds(former_hospitalisation_alternative_prior, here("output_data", "former_hospitalisation_alternative.rds"))
+write_rds(current_severity_alternative_prior, here("output_data", "current_severity_alternative.rds"))
+write_rds(former_severity_alternative_prior, here("output_data", "former_severity_alternative.rds"))
+write_rds(current_mortality_alternative_prior, here("output_data", "current_mortality_alternative.rds"))
+write_rds(former_mortality_alternative_prior, here("output_data", "former_mortality_alternative.rds"))
+

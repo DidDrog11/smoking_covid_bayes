@@ -25,13 +25,20 @@ unlink('reports/markdown_report_cache', recursive = TRUE)
 
 ## Load packages
 * **Load packages**: All necessary packages are loaded in from the `libraries.r` script in the `/scripts` folder.
-* **Author dictionary**: An author dictionary is created to manage the presentation of author names in the final tables and meta-analyses
+* **Author dictionary**: An author dictionary is created to manage the presentation of author names in the final tables and meta-analyses. This is particularly for those with punctuation in their names.
 * **Load scripts**: We have written functions to handle much of the Bayesian analysis
-* **Load Bayesian datasets**: The Bayesian approach relies on large simulated datasets from the observed data, for this report we only present the results graphically from data simulated outside of the report. The scripts `bayes_scripts.R`, `bayesian_data_generation.R` and `bayesian_analysis.R` should be able to be run locally to generate your own simulated data.
+* **Load Bayesian datasets**: The Bayesian approach relies on large simulated datasets derived from the observed data, for this report we only present the results graphically from data simulated outside of the report. The scripts `bayes_scripts.R`, `bayesian_data_generation.R` and `bayesian_analysis.R` should be able to be run locally to generate your own simulated data.
 
 The code is all stored in the GitHub repository [here](https://github.com/DidDrog11/smoking_covid/tree/master)
 ```{r load_packages, include=FALSE, quietly=T}
 source(here::here("scripts", "libraries.R"))
+set_flextable_defaults(
+  font.family = "Calibri", 
+  font.size = 8,
+  font.color = "black",
+  digits = 1,
+  theme_fun = "theme_booktabs"
+  )
 ```
 
 ```{r load_dictionary}
@@ -42,7 +49,7 @@ This is relatively automated in this script however, if you don't have an API ke
 ``` {r google_data}
 google_api <- rstudioapi::askForSecret("Google API Key")
 register_google(google_api)
-drive_download("https://docs.google.com/spreadsheets/d/1jelIGxrm99QpDKwSoyMUliDJQWtzk4bHsNGDaIjxTaU/edit?usp=sharing", path = here("data_spreadsheet", "data_extraction_current.xlsx"), overwrite = T)
+drive_download("https://docs.google.com/spreadsheets/d/1VUY5xDLBpjNBovveg9wQrc0wbLhnEkmDPMR63rfj2-Y/edit?usp=sharing", path = here("data_spreadsheet", "data_extraction_current.xlsx"), overwrite = T)
 
 search_details <- readxl::read_xlsx(here("data_spreadsheet", "data_extraction_current.xlsx"), sheet = 'article_screening')
 data_study_general <- readxl::read_xlsx(here("data_spreadsheet", "data_extraction_current.xlsx"), sheet = 'general_details')
@@ -156,6 +163,7 @@ We define the current version of the report here. This report has been generated
 ``` {r excluding_studies}
 superseded_studies <- names(tidyselect::vars_select(data_study_general$lead_author, ends_with("_old", ignore.case = T)))
 old_isaric <- head(names(tidyselect::vars_select(data_study_general$lead_author, starts_with("isaric", ignore.case = T))), n = -1)
+#This will prevent duplication of the ISARIC reports, only retaining the last based on their names
 excluded_other_reason <- c("mehra", #retracted
                            "hopkinson", #self-reported
                            "gaibazzi", #withdrawn
@@ -177,6 +185,7 @@ Based on the version and excluded studies we produce the tables for analysis.
 This is a searchable table.
 ``` {r descriptives}
 source(here("scripts", "remove_excluded.r"))
+current_total <- nrow(a)
 datatable(a)
 
 a <- flextable(a)%>%
@@ -191,9 +200,7 @@ save_as_docx(a, path = here('output_data', 'included_studies.docx'))
 ## The PRISMA diagram will be updated
 The PRISMA reporting guidelines for systematic reviews the guidance is available [here](http://www.prisma-statement.org/). This takes the format of the number of articles obtained from the search from [OVID](https://ovidsp.dc1.ovid.com/sp-4.07.0b/ovidweb.cgi) (login may be needed), [medRxiv](https://www.medrxiv.org/search/text_abstract_title%3Asmoking%2BAND%2BCOVID%20text_abstract_title_flags%3Amatch-all%20jcode%3Amedrxiv%20numresults%3A75%20sort%3Apublication-date%20direction%3Adescending%20format_result%3Astandard), and articles identified by the research team. These are then screened at the title and abstract level. Full texts are then read to extract relevant data, if articles are excluded at this level we describe the reason for this. All of the selected articles will contribute to the narrative synthesis but only those that are judged 'good' or 'fair' quality will be included in the Bayesian meta-analysis.
 ``` {r PRISMA}
-current_total <- 345
-
-previous_total <- 279
+previous_total <- 345
 
 prisma <- search_details %>%
   group_by(review_version) %>%
@@ -258,7 +265,7 @@ a
 country <- subset(country, Country != "Multiple")
 ```
 Currently studies are reported from `r paste(nrow(country))`
-``` {r}
+``` {r, cache=TRUE}
 country <- mutate_geocode(country, Country)
 
 country_bounds <- country %>%
@@ -273,7 +280,7 @@ map_world <- map_data(map = "world") %>%
 save_as_docx(a, path = here('output_data', 'Countries_performing_studies.docx'))  
 ```
 ## A map is produced for where the studies are performed
-``` {r interactive global map, cache = TRUE}
+``` {r interactive global map, cache = TRUE, quietly = TRUE, echo=FALSE, results = "hide"}
 library(rgdal)
 library(leaflet)
 library(coronavirus)
@@ -284,7 +291,7 @@ my_spdf <- readOGR(
   verbose=FALSE
 )
 
-from_countries <- c("USA", "UK", "Iran",  "Korea, South")
+from_countries <- c("USA", "UK", "Iran",  "South Korea")
 to_countries <- c("United States", "United Kingdom", "Iran (Islamic Republic of)", "Korea, Republic of")
 country_map <- country %>%
   mutate(Country = plyr::mapvalues(Country, from = from_countries,
@@ -292,6 +299,9 @@ country_map <- country %>%
 
 refresh_coronavirus_jhu()
 data("coronavirus")
+```
+
+``` {r produce_map}
 summary_df <- coronavirus %>% 
   filter(type == "confirmed") %>%
   group_by(country) %>%
@@ -313,8 +323,8 @@ my_spdf@data$Number[ which(my_spdf@data$Number == 0)] = NA
 my_spdf@data$total_cases[ which(is.na(my_spdf@data$total_cases))] = 0
 
 
-my_bins <- c(0, 1, 5, 10, 20, 50, 70, 100)
-mypalette <- colorBin(palette="YlOrBr", domain=my_spdf@data$Number, na.color="transparent", bins=my_bins)
+my_bins <- c(0, 1, 5, 10, 20, 50, 70, 110)
+mypalette <- leaflet::colorBin(palette="YlOrBr", domain=my_spdf@data$Number, na.color="transparent", bins=my_bins)
 
 mytext <- paste(
   "Country: ", my_spdf@data$NAME,"<br/>", 
@@ -760,9 +770,9 @@ saveRDS(a %>%
           select(-"Study ID") %>%
           rename("ref" = doi),
         file = here("data_clean", "table_1_refs.rds"))
-#source(here("scripts", "references_in_table.r"))
+source(here("scripts", "references_in_table.r"))
 ```
-The total number of included studies is `r paste(nrow(table_1_word))`. This table is searchable
+The total number of included studies is `r paste(nrow(table_1_word))`. This table is searchable. The references are added in automatically from Zotero. The bibtex file is saved as `manuscript.bib` and is updated following each search.
 ```{r}
 datatable(a) %>%
   formatRound(
@@ -863,7 +873,7 @@ a$Author  <- a$Author  %>%
   recode("Bello, Chavolla" = "Bello-Chavolla",
          "De, Lusignan" = "de Lusignan",
          "Del, Valle" = "del Valle")
-a$Author <- to_upper_camel_case(a$`Lead author`, sep_out = ", ")
+a$Author <- to_upper_camel_case(a$Author, sep_out = ", ")
 author_list <- plyr::mapvalues(a$Author,
                                from = cleaned_names,
                                to = correct_names)
@@ -914,12 +924,13 @@ table_2 <- table_2_word
 included_studies <- quality_table_2 %>%
   filter(overall_quality != 'poor') %>%
   select(lead_author) %>%
-  filter(!lead_author %in% c("reiter", "hippisley_cox", "ullah"))
+  filter(!lead_author %in% c("reiter", "hippisley_cox", "ullah", "lowe", "polat"))
 
 good_quality_2 <- quality_table_2 %>%
   filter(overall_quality == 'good')
 
 fair_quality_2 <- quality_table_2 %>%
+  filter(lead_author %in% included_studies$lead_author) %>%
   filter(overall_quality == 'fair')
 
 meta <- tibble('author' = table_2$lead_author,
@@ -1187,7 +1198,8 @@ included_studies <- quality_table_3 %>%
   select(lead_author)
 
 fair_quality_3 <- quality_table_3 %>%
-  filter(overall_quality != 'fair')
+  filter(lead_author %in% included_studies$lead_author) %>%
+  filter(overall_quality == 'fair')
   
 ```
 The studies included in meta-analysis are `r knitr::combine_words(pull(included_studies, lead_author))`.
@@ -1418,6 +1430,7 @@ included_studies <- quality_table_4 %>%
   select(lead_author)
 
 fair_quality_4 <- quality_table_4 %>%
+  filter(lead_author %in% included_studies$lead_author) %>%
   filter(overall_quality == 'fair')
 ```
 The studies included in meta-analysis are `r knitr::combine_words(pull(included_studies, lead_author))`.
@@ -1545,6 +1558,7 @@ quality_table_5 <- table_5_word %>%
   select(lead_author, overall_quality)
 
 fair_quality_5 <- quality_table_5 %>%
+  filter(lead_author %in% included_studies$lead_author) %>%
   filter(overall_quality != 'fair')
 
 a <- table_5_word %>%
@@ -1656,8 +1670,9 @@ included_studies <- quality_table_5 %>%
   filter(!lead_author %in% exclude) %>%
   select(lead_author)
 
-fair_quality_4 <- quality_table_5 %>%
-  filter(overall_quality != 'fair')
+fair_quality_5 <- quality_table_5 %>%
+  filter(lead_author %in% included_studies$lead_author) %>%
+  filter(overall_quality == 'fair')
 ```
 The studies included in meta-analysis are `r knitr::combine_words(pull(included_studies, lead_author))`.
 

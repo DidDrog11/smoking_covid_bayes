@@ -1,5 +1,5 @@
 ---
-title: 'Smoking and COVID Living Review (`r paste(current_version)`): a bayesian analysis'
+title: 'The association of smoking status with SARS-CoV-2 infection, hospitalisation and mortality from COVID-19: A living rapid evidence review with Bayesian meta-analyses (`r paste(current_version)`)'
 author: "David Simons, Lion Shahab, Jamie Brown and Olga Perski"
 date: "`r format(Sys.time(), '%A %d %B %Y')`"
 output:
@@ -11,12 +11,12 @@ output:
     toc_float: yes
     number_sections: no
     theme: simplex
-    css: C:/Users/ucbtds4/R Repositories/smoking_covid_bayes/css/style.css
+    css: C:/Users/ucbtds4/R_Repositories/smoking_covid_bayes/css/style.css
     keep_md: no
 editor_options:
   chunk_output_type: inline
 bibliography: manuscript.bib
-csl: harvard.csl
+csl: apa.csl
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F,
@@ -127,6 +127,7 @@ Eight studies recorded the use of alternative nicotine products in current and/o
 Three studies were performed in random or representative population samples and were rated as ‘good’ quality, and `r paste(nrow(fair_quality_number))` studies were rated as ‘fair’ quality, of which `r paste(nrow(running_meta_count))` studies reported results stratified by smoking status for the outcomes of interest and could be included in meta-analyses. The remaining `r paste(nrow(poor_quality_number))` studies were rated as ‘poor’ quality (see [Table 1](#table-1)).
 
 #### [*Table 1.* All studies included in narrative review and meta-analysis]{#table-1}
+
 ``` {r table_1, include=T}
 library(flextable)
 library(ftExtra)
@@ -167,6 +168,7 @@ Four studies provided data on access to SARS-CoV-2 diagnostic testing for those 
 `r paste(nrow(table_2_word))` studies provided data on SARS-CoV-2 infection for people meeting local testing criteria by smoking status (see [Table 2](#table-2)). Meta-analyses were performed for `r paste(nrow(good_quality_2))` ‘good’ and `r paste(nrow(fair_quality_2))` ‘fair’ quality studies (see [Figure 3](#fig-3) and [4](#fig-4)). Current smokers were at reduced risk of testing positive for SARS-CoV-2 compared with never smokers (RR = `r paste(round(current_testing_RR_value, 2))`, 95% Credible Interval (CrI) = `r paste(round(current_testing_lci, 2), round(current_testing_uci, 2), sep = "-")`, τ = `r paste(round(current_testing_tau, 2))`). The three good quality studies each reported point estimates less than 1, although the CrI for one of the three studies crossed 1. The probability of current smokers being at reduced risk of infection compared with never smokers (RR ≤0.9) was >99%. Former compared with never smokers were at increased risk of testing positive, but data were inconclusive (RR = `r paste(round(former_testing_RR_value, 2))`, 95% CrI = `r paste(round(former_testing_lci, 2), round(former_testing_uci, 2), sep = "-")`, τ = `r paste(round(former_testing_tau, 2))`) and favoured there being no important association. The probability of former smokers being at increased risk of infection (RR ≥1.1) compared with never smokers was `r paste(round(1-m2_a_ecdf(1.1), 2)*100, "%", sep = "")`. Results were materially unchanged in sensitivity analyses.
 
 ####    [*Table 2* SARS-CoV-2 infection by smoking status]{#table-2}
+
 ``` {r table_2, include=T}
 readRDS(file = here::here("reports", "tables", "table_2.rds"))
 ```
@@ -180,6 +182,7 @@ readRDS(file = here::here("reports", "tables", "table_2.rds"))
 `r paste(nrow(table_3_word))` studies examined hospitalisation for COVID-19 disease, stratified by smoking status (see [Table 3](#table-3)). Meta-analyses were performed for `r paste(nrow(fair_quality_3))` ‘fair’ quality studies (see [Figure 5](#fig-5) and [6](#fig-6)). Current (RR = `r paste(round(current_hospitalisation_RR_value, 2))`, 95% CrI = `r paste(round(current_hospitalisation_lci, 2), round(current_hospitalisation_uci, 2), sep = "-")`, τ = `r paste(round(current_hospitalisation_tau, 2))`) and former (RR = `r paste(round(former_hospitalisation_RR_value, 2))`, CrI = `r paste(round(former_hospitalisation_lci, 2), round(former_hospitalisation_uci, 2), sep = "-")`, τ = `r paste(round(former_hospitalisation_tau, 2))`) compared with never smokers were at increased risk of hospitalisation with COVID-19. However, data for current smokers were inconclusive and favoured there being no important association. The probability of current and former smokers being at increased risk of hospitalisation (RR ≥1.1) compared with never smokers was `r paste(round(1-m3_a_ecdf(1.1),2)*100,"%", sep = "")` and `r paste(round(1-m4_a_ecdf(1.1),2)*100, "%", sep = "")`, respectively. Results were materially unchanged in two sensitivity analyses. 
 
 ####    [*Table 3* COVID-19 hospitalsation by smoking status]{#table-3}
+
 ``` {r table_3, include=T}
 readRDS(file = here::here("reports", "tables", "table_3.rds"))
 ```
@@ -193,6 +196,7 @@ readRDS(file = here::here("reports", "tables", "table_3.rds"))
 `r paste(nrow(table_4_word))` studies reported disease severity in hospitalised patients stratified by smoking status (see [Table 4](#table-4)). Severe (as opposed to non-severe) disease was broadly defined as requiring intensive treatment unit (ITU) admission, requiring oxygen as a hospital inpatient or in-hospital death. Meta-analyses were performed for `r paste(nrow(fair_quality_4))` ‘fair’ quality studies (see [Figure 7](#fig-7) and [8](#fig-8)). Current (RR = `r paste(round(current_severity_RR_value, 2))`, 95% CrI = `r paste(round(current_severity_lci, 2), round(current_severity_uci, 2), sep = "-")`, τ = `r paste(round(current_severity_tau, 2))`) and former (RR = `r paste(round(former_severity_RR_value, 2))`, 95% CrI = `r paste(round(former_severity_lci, 2), round(former_severity_uci, 2), sep = "-")`, τ = `r paste(round(former_severity_tau, 2))`) compared with never smokers were at increased risk of greater disease severity. However, while data for current smokers only were inconclusive, they favoured there being a small but important association. The probability of current and former smokers having increased risk of greater disease severity (RR ≥1.1) compared with never smokers was `r paste(round(1-m5_a_ecdf(1.1),2)*100, "%", sep = "")` and `r paste(round(1-m6_a_ecdf(1.1),2)*100, "%", sep = "")`, respectively. Results were materially unchanged in two sensitivity analyses. 
 
 ####    [*Table 4* COVID-19 disease severity by smoking status]{#table-4}
+
 ``` {r table_4, include=T}
 readRDS(file = here::here("reports", "tables", "table_4.rds"))
 ```
@@ -206,6 +210,7 @@ readRDS(file = here::here("reports", "tables", "table_4.rds"))
 `r paste(nrow(table_5_word))` studies reported mortality from COVID-19 by smoking status (see [Table 5](#table-5)), with `r paste(nrow(fair_quality_5))` ‘fair’ quality studies included in meta-analyses (see [Figure 9](#fig-9) and [10](#fig-10)). Current (RR = `r paste(round(current_mortality_RR_value, 2))`, 95% CrI = `r paste(round(current_mortality_lci, 2), round(current_mortality_uci, 2), sep = "-")`, τ = `r paste(round(current_mortality_tau, 2))`) and former (RR = `r paste(round(former_mortality_RR_value, 2))`, 95% CrI = `r paste(round(former_mortality_lci, 2), round(former_mortality_uci, 2), sep = "-")`, τ = `r paste(round(former_mortality_tau, 2))`) compared with never smokers were at increased risk of in-hospital mortality from COVID-19. However, data for current smokers were inconclusive and favoured there being no important association. The probability of current and former smokers being at greater risk of in-hospital mortality (RR ≥1.1) compared with never smokers was `r paste(round(1-m7_a_ecdf(1.1),2)*100, "%", sep = "")` and >99%, respectively. Results were materially unchanged in two sensitivity analyses. 
 
 ####    [*Table 5* COVID-19 attributed mortality by smoking status]{#table-5}
+
 ``` {r table_5, include=T}
 readRDS(file = here::here("reports", "tables", "table_5.rds"))
 ```

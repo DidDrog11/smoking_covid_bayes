@@ -1,17 +1,8 @@
-library(brms)
-library(ggplot2)
-library(tidybayes)
-library(readr)
-library(dplyr)
-library(ggridges)
-library(glue)
-library(stringr)
-library(forcats)
-library(here)
-library(meta)
-library(snakecase)
+# This script produces the bayesian models by generating the repeat samples.
+
 set.seed(42)
 
+source(here("scripts", "libraries.R"))
 source(here("scripts", "bayes_scripts.R"))
 source(here("scripts", "author_dictionary.R"))
 
@@ -19,6 +10,8 @@ data_study_general <- readRDS(here("data_clean", "data_study_general.rds"))
 versions <- as_data_frame(read_rds(here("data_clean", "versioning.rds")))
 previous_review_versions <- unique(versions$prev_versions)
 current_review_version <- unique(versions$current_version)
+
+# Once the data has initially been cleaned elsewhere we classify the new studies as current review version and compare them to previous versions.
 
 study_review_version <- data_study_general %>%
   mutate(lead_author = to_upper_camel_case(lead_author, sep_out = ", "),
@@ -33,6 +26,7 @@ study_review_version <- data_study_general %>%
 levels(study_review_version$review_version) <- c(levels(study_review_version$review_version), "combined_pooled") %>%
   fct_relevel(c("previous", "current", "combined_pooled"))
 
+# The data is read in from the report generation which generates the study level summary statistics, RR, 95% CI and %W
 
 bayes_testing_current <-
   read_rds(here("data_clean", "bayes_testing_current.rds"))
@@ -51,6 +45,8 @@ bayes_mortality_current <-
 bayes_mortality_former <-
   read_rds(here("data_clean", "bayes_mortality_former.rds"))
 
+# The treatment effect and standard error of each meta-analysis is obtained 
+
 testing_bayes_c <- extract_TE(bayes_testing_current)
 testing_bayes_f <- extract_TE(bayes_testing_former)
 hospital_bayes_c <- extract_TE(bayes_hospital_current)
@@ -60,11 +56,14 @@ severity_bayes_f <- extract_TE(bayes_severity_former)
 mortality_bayes_c <- extract_TE(bayes_mortality_current)
 mortality_bayes_f <- extract_TE(bayes_mortality_former)
 
+# We define the minimally informative prior for the subsequent meta-analysis
+
 minimally_informative_prior <-
   c(prior(normal(0, 1), class = Intercept),
     prior(cauchy(0, 0.5), class = sd))
 
 # Previous meta-analysis guided priors
+
 current_testing_prior <-
   c(prior(normal(-.371, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
@@ -90,7 +89,8 @@ former_mortality_prior <-
   c(prior(normal(0.3365, 1), class = Intercept),
     prior(cauchy(0, 1), class = sd))
 
-# Classical meta-analysis guided priors with high heterogeneity
+# Classical meta-analysis guided priors with high heterogeneity this is used as sensitivity analysis
+
 current_testing_prior_hh <-
   c(prior(normal(-.371, 1), class = Intercept),
     prior(cauchy(0.3, 1), class = sd))

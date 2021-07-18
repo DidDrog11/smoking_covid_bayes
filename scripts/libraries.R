@@ -1,23 +1,30 @@
-library(brms)
-library(ggplot2)
-library(tidybayes)
-library(readr)
-library(dplyr)
-library(tidyr)
-library(ggridges)
-library(glue)
-library(stringr)
-library(forcats)
-library(here)
-library(meta)
-library(snakecase)
-library(flextable)
-library(googlesheets4)
-library(googledrive)
-library(linelist)
-library(DT)
-library(epitools)
-library(ggmap)
-library(gtsummary)
-library(bib2df)
-library(ftExtra)
+if (!require("linelist")) devtools::install_github("reconhub/linelist")
+
+if (!require("pacman")) install.packages("pacman")
+pkgs =
+  c("brms",
+    "ggplot2",
+    "tidybayes",
+    "readr",
+    "tidyverse",
+    "ggridges",
+    "glue",
+    "stringr",
+    "forcats",
+    "here",
+    "meta",
+    "snakecase",
+    "flextable",
+    "googlesheets4",
+    "googledrive",
+    "linelist",
+    "DT",
+    "epitools",
+    "ggmap",
+    "gtsummary",
+    "bib2df",
+    "ftExtra",
+    "meta",
+    "snakecase"
+  )
+pacman::p_load(pkgs, character.only = T)

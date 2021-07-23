@@ -19,8 +19,8 @@ review_details <- data_study_general %>%
 
 table_1 <- table_1 %>%
   clean_data() %>%
-  mutate(., lower_range = sub('\\_.*', '', .$range)) %>%
-  mutate(., upper_range = sub('.*_', '',.$range,)) %>% ## We break apart the age range into an upper and lower level
+  mutate(lower_range = sub('\\_.*', '', .$range),
+         upper_range = sub('.*_', '',.$range,)) %>% ## We break apart the age range into an upper and lower level
   select(lead_author, sample_size, female_sex_percent, data_source, median_age, mean_age, iqr_lower, iqr_upper, standard_deviation, lower_range,
          upper_range, current_smoker, former_smoker, current_former_smoker, never_smoker, never_smoker_unknown, current_vaper, former_vaper,
          current_former_vaper, not_stated, missing, total) %>%

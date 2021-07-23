@@ -1,5 +1,5 @@
 ---
-title: 'Smoking and COVID Living Review (v10): a bayesian analysis'
+title: 'Smoking and COVID Living Review (v12): a bayesian analysis'
 author: "David Simons, Lion Shahab, Jamie Brown and Olga Perski"
 date: "`r format(Sys.time(), '%A %d %B %Y')`"
 output: 
@@ -68,14 +68,15 @@ We have extracted data from `r nrow(data_study_general)` studies, however, some 
 The first sheet is **Search details**  we use this sheet to keep track of the number of studies found in our search and keep track of the number of titles and abstracts screened and number of papers included in each review version. It presents the data in groups of search periods.
 
 ```{r head_search_details}
-flextable(search_details[,1:13])
+flextable(search_details %>%
+            mutate(`date_screening in format (2020-05-22)` = ymd(`date_screening in format (2020-05-22)`)))
 ```
 The second sheet is **General study details** this includes the lead author, where the study is published, the date it was published, the country in which the data originated and the DoI or link to the publication for our records.
 
 This is a searchable list of all the studies that have met out inclusion and exclusion criteria up until `r paste(max(search_details$date_screened))`. These are live links and should direct to the relevant article, however, some may have been deleted or require institutional access.
 ```{r tail_study_details, include=FALSE}
 datatable(data_study_general[1:4] %>%
-            mutate(`date_published_format(2020-05-12)` = as.Date(data_study_general$`date_published_format(2020-05-12)`),
+            mutate(`date_published_format(2020-05-12)` = ymd(data_study_general$`date_published_format(2020-05-12)`),
                    doi = paste0("<a href='",doi,"' target='_blank'>",doi,"</a>")),
           colnames = c("Lead author" = 2, "Date published" = 3, "Source" = 4, "DOI" = 5),
           escape = F)
@@ -161,9 +162,16 @@ write_rds(versioning, here("data_clean", "versioning.rds"))
 We define the current version of the report here. This report has been generated for version `r paste(current_version)`
 
 ``` {r excluding_studies}
-superseded_studies <- names(tidyselect::vars_select(data_study_general$lead_author, ends_with("_old", ignore.case = T)))
-old_isaric <- head(names(tidyselect::vars_select(data_study_general$lead_author, starts_with("isaric", ignore.case = T))), n = -1)
+superseded_studies <- data_study_general %>%
+  filter(str_ends(lead_author, "_old")) %>%
+  pull(lead_author)
+
+old_isaric <- data_study_general %>%
+  filter(str_starts(lead_author, "isaric")) %>%
+  head(., -1) %>%
+  pull(lead_author)
 #This will prevent duplication of the ISARIC reports, only retaining the last based on their names
+
 excluded_other_reason <- c("mehra", #retracted
                            "hopkinson", #self-reported
                            "gaibazzi", #withdrawn
@@ -184,7 +192,7 @@ Based on the version and excluded studies we produce the tables for analysis.
 
 This is a searchable table.
 ``` {r descriptives}
-source(here("scripts", "remove_excluded.r"))
+source(here("scripts", "remove_excluded.r")) # This removes the excluded studies from each table that has been read in previously.
 current_total <- nrow(a)
 datatable(a)
 
@@ -200,7 +208,9 @@ save_as_docx(a, path = here('output_data', 'included_studies.docx'))
 ## The PRISMA diagram will be updated
 The PRISMA reporting guidelines for systematic reviews the guidance is available [here](http://www.prisma-statement.org/). This takes the format of the number of articles obtained from the search from [OVID](https://ovidsp.dc1.ovid.com/sp-4.07.0b/ovidweb.cgi) (login may be needed), [medRxiv](https://www.medrxiv.org/search/text_abstract_title%3Asmoking%2BAND%2BCOVID%20text_abstract_title_flags%3Amatch-all%20jcode%3Amedrxiv%20numresults%3A75%20sort%3Apublication-date%20direction%3Adescending%20format_result%3Astandard), and articles identified by the research team. These are then screened at the title and abstract level. Full texts are then read to extract relevant data, if articles are excluded at this level we describe the reason for this. All of the selected articles will contribute to the narrative synthesis but only those that are judged 'good' or 'fair' quality will be included in the Bayesian meta-analysis.
 ``` {r PRISMA}
-previous_total <- 345
+previous_total <- read_rds(here("data_clean", "data_study_general.rds")) %>%
+  filter(review_version %in% prev_versions) %>%
+  nrow()
 
 prisma <- search_details %>%
   group_by(review_version) %>%
@@ -238,14 +248,13 @@ As the pandemic continues studies are being reported from an increasing numbers 
 ``` {r countries, cache = TRUE}
 #Countries
 country <- table_1$country %>%
-  to_upper_camel_case() %>%
-  recode(., 'Usa' = 'USA', 'Uk' = 'UK', 'SaudiArabia' = 'Saudi Arabia', "SouthKorea" = "South Korea", "UnitedArabEmirates" = "United Arab Emirates") %>%
+  to_upper_camel_case(sep_out = " ") %>%
+  recode(., 'Usa' = 'USA', 'Uk' = 'UK') %>%
   table() %>%
   as.data.frame() %>%
   arrange(desc(Freq)) %>%
   rename('Country' = 1,
-         'Number' = 2) %>%
-  mutate(Country = as.character(Country))
+         'Number' = 2)
 
 all_countries <- country %>%
   group_split(-Number)
@@ -262,17 +271,23 @@ a <- flextable(country) %>%
   set_table_properties(width = 0.5, layout = 'autofit')
 a
 
-country <- subset(country, Country != "Multiple")
+country <- country %>%
+  filter(Country != "Multiple")
 ```
-Currently studies are reported from `r paste(nrow(country))`
-``` {r, cache=TRUE}
-country <- mutate_geocode(country, Country)
+Currently studies are reported from `r paste(nrow(country))` countries.
 
-country_bounds <- country %>%
-  select(lon, lat) %>%
-  tidyr::drop_na() %>%
-  sp::SpatialPointsDataFrame(coords = .[,1:2], data = .) %>%
-  sp::bbox() * 1.1
+``` {r, cache=TRUE}
+countries <- ne_countries(type = "countries", returnclass = "sf")
+
+map <- country %>%
+  mutate(iso3c = countrycode::countrycode(Country, origin = "country.name", destination = "iso3c")) %>%
+  left_join(., countries %>%
+              as_tibble() %>%
+              dplyr::select(adm0_a3, geometry), by = c("iso3c" = "adm0_a3")) %>%
+  st_as_sf()
+  
+country_bounds <- map %>%
+  st_bbox()
 
 map_world <- map_data(map = "world") %>%
   filter(region != "Antarctica")

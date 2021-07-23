@@ -6,6 +6,7 @@ pkgs =
     "ggplot2",
     "tidybayes",
     "readr",
+    "lubridate",
     "tidyverse",
     "ggridges",
     "glue",
@@ -25,6 +26,9 @@ pkgs =
     "bib2df",
     "ftExtra",
     "meta",
-    "snakecase"
+    "snakecase",
+    "revtools",
+    "rnaturalearth",
+    "sf"
   )
 pacman::p_load(pkgs, character.only = T)

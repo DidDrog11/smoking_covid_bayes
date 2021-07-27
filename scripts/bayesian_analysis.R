@@ -590,7 +590,7 @@ pooled_draw_m8_a <- pooled_effect_draw(m8_a)
 study_draws_m8_a <- study_draws_m8_a %>%
   mutate(review_version = as.character(review_version),
          review_version = ifelse(is.na(review_version), "current", review_version),
-         review_version = factor(review_version, levels = c("previous", "current"))
+         review_version = factor(review_version, levels = c("previous", "current")))
 # study_draws_m8_a_hh <- study_draws_m8_a_hh %>%
 #   mutate(review_version = as.character(review_version),
 #          review_version = ifelse(is.na(review_version), "current", review_version),
@@ -606,7 +606,7 @@ study_draws_m8_a <- study_draws_m8_a %>%
 #   "m8.png"
 # )
 
-former_mortality_alternative_prior <- forest_plot(
+(former_mortality_alternative_prior <- forest_plot(
   m8_a,
   study_draws_m8_a,
   pooled_draw_m8_a,
@@ -614,7 +614,7 @@ former_mortality_alternative_prior <- forest_plot(
   "Forest plot of former smokers and mortality",
   paste(tail(previous_review_versions, 1), "mortality prior"),
   "m8_a.png"
-)
+))
 
 png(file = (here("reports", "figure","ECDF_m8_a.png")))
 plot(m8_a_ecdf, main = "Empirical cumulative distribution, former smokers, mortality",

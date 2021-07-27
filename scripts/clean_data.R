@@ -23,8 +23,9 @@ table_1 <- table_1 %>%
          upper_range = sub('.*_', '',.$range,)) %>% ## We break apart the age range into an upper and lower level
   select(lead_author, sample_size, female_sex_percent, data_source, median_age, mean_age, iqr_lower, iqr_upper, standard_deviation, lower_range,
          upper_range, current_smoker, former_smoker, current_former_smoker, never_smoker, never_smoker_unknown, current_vaper, former_vaper,
-         current_former_vaper, not_stated, missing, total) %>%
-  mutate(study_id = 1:length(lead_author)) %>%
+         current_former_vaper, never_vaper, current_smokeless_tobacco, current_smoker_vaper, former_smoker_vaper, never_smoker_vaper,
+         current_smoker_former_vaper, former_smoker_former_vaper, never_smoker_former_vaper, not_stated, missing, total) %>%
+  mutate(study_id = row_number()) %>%
   filter(!is.na(lead_author)) %>%
   left_join(., review_details %>%
               select(-"lead_author"), by = 'study_id') %>%
@@ -35,7 +36,7 @@ table_1 <- table_1 %>%
 
 table_2 <-  table_2 %>%
   clean_data() %>%
-  mutate(study_id = 1:length(lead_author)) %>%
+  mutate(study_id = row_number()) %>%
   filter(data_on_testing == TRUE) %>%
   left_join(., review_details %>%
               select(-"lead_author"), by = 'study_id') %>%
@@ -43,7 +44,7 @@ table_2 <-  table_2 %>%
 
 table_3 <-  table_3 %>%
   clean_data() %>%
-  mutate(study_id = 1:length(lead_author)) %>%
+  mutate(study_id = row_number()) %>%
   filter(data_on_hospitalisation == TRUE) %>%
   left_join(., review_details %>%
               select(-"lead_author"), by = 'study_id') %>%
@@ -51,7 +52,7 @@ table_3 <-  table_3 %>%
 
 table_4 <-  table_4 %>%
   clean_data() %>%
-  mutate(study_id = 1:length(lead_author)) %>%
+  mutate(study_id = row_number()) %>%
   filter(data_disease_severity == TRUE) %>%
   left_join(., review_details %>%
               select(-"lead_author"), by = 'study_id') %>%
@@ -59,7 +60,7 @@ table_4 <-  table_4 %>%
 
 table_5 <- table_5 %>%
   clean_data() %>%
-  mutate(study_id = 1:length(lead_author)) %>%
+  mutate(study_id = row_number()) %>%
   filter(data_on_deaths == TRUE) %>%
   left_join(., review_details %>%
               select(-"lead_author"), by = 'study_id') %>%

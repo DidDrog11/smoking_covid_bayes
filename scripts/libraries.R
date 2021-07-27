@@ -29,6 +29,11 @@ pkgs =
     "snakecase",
     "revtools",
     "rnaturalearth",
-    "sf"
+    "sf",
+    "leaflet",
+    "coronavirus",
+    "cowplot"
   )
 pacman::p_load(pkgs, character.only = T)
+
+write_rds(sessionInfo(), here("reports", "all_packages.rds"))

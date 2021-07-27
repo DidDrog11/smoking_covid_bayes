@@ -1,10 +1,12 @@
-source(here("scripts", "libraries.R"))
+source(here::here("scripts", "libraries.R"))
 source(here("scripts", "bayes_scripts.R"))
 source(here("scripts", "author_dictionary.R"))
+source(here("scripts", "bayesian_data_generation.R"))
 versions <- read_rds(here("data_clean", "versioning.rds"))
 
 previous_review_versions <- unique(versions[,1])
 current_review_version <- unique(versions[,2])
+current_version <- unique(versions[,2])
 
 data_study_general <- read_rds(here("data_clean", "data_study_general.rds"))
 
@@ -21,7 +23,7 @@ study_review_version <- data_study_general %>%
 levels(study_review_version$review_version) <- c(levels(study_review_version$review_version), "combined_pooled") %>%
   fct_relevel(c("previous", "current", "combined_pooled"))
 
-m1 <- read_rds(here("data_clean", "bayesian_models", "testing_current_m1.rds"))
+#m1 <- read_rds(here("data_clean", "bayesian_models", "testing_current_m1.rds"))
 m1_a <- read_rds(here("data_clean", "bayesian_models", "testing_current_m1_a.rds"))
 #m1_a_hh <- read_rds(here("data_clean", "bayesian_models", "testing_current_m1_a_hh.rds"))
 #m2 <- read_rds(here("data_clean", "bayesian_models", "testing_former_m2.rds"))
@@ -68,9 +70,13 @@ m1_a_ecdf(0.9) #informative
 # pooled_draw_m1 <- pooled_effect_draw(m1)
 
 study_draws_m1_a <- study_draw(m1_a) %>%
-  mutate(Author = ifelse(Author == "Merkely", "Merkely*",
-                         ifelse(Author == "Carrat", "Carrat*",
-                                ifelse(Author == "Richard", "Richard*", Author))))
+  mutate(Author = case_when(Author == "Merkely" ~ "Merkely*",
+                            Author == "Carrat" ~ "Carrat*", 
+                            Author == "Richard" ~ "Richard*",
+                            Author == "Barchuk" ~ "Barchuk*",
+                            Author == "Gornyk" ~ "Gornyk*",
+                            Author == "Radon" ~ "Radon*",
+                            TRUE ~ Author))
 pooled_draw_m1_a <- pooled_effect_draw(m1_a)
 
 # study_draws_m1_a_hh <- study_draw(m1_a_hh) %>%
@@ -138,9 +144,13 @@ m2_a_ecdf <- ecdf(exp(post_samples_m2_a$TE))
 # pooled_draw_m2 <- pooled_effect_draw(m2)
 
 study_draws_m2_a <- study_draw(m2_a) %>%
-  mutate(Author = ifelse(Author == "Merkely", "Merkely*",
-                         ifelse(Author == "Carrat", "Carrat*",
-                                ifelse(Author == "Richard", "Richard*", Author))))
+  mutate(Author = case_when(Author == "Merkely" ~ "Merkely*",
+                            Author == "Carrat" ~ "Carrat*", 
+                            Author == "Richard" ~ "Richard*",
+                            Author == "Barchuk" ~ "Barchuk*",
+                            Author == "Gornyk" ~ "Gornyk*",
+                            Author == "Radon" ~ "Radon*",
+                            TRUE ~ Author))
 pooled_draw_m2_a <- pooled_effect_draw(m2_a)
 
 # study_draws_m2_a_hh <- study_draw(m2_a_hh) %>%
@@ -350,7 +360,13 @@ m5_a_ecdf <- ecdf(exp(post_samples_m5_a$TE))
 # pooled_draw_m5 <- pooled_effect_draw(m5)
 
 study_draws_m5_a <- study_draw(m5_a)
-study_draws_m5_a$review_version[study_draws_m5_a$Author == "Guan"] <- "previous"
+study_draws_m5_a <- study_draws_m5_a %>%
+  mutate(review_version = as.character(review_version),
+         review_version = case_when(Author == "Guan" ~ "previous",
+                                    Author == "Hojbjerg" ~ "current",
+                                    Author == "P-HOSP-COVID.Collaborative" ~ "current",
+                                   TRUE ~ review_version)) %>%
+  mutate(review_version = factor(review_version))
 pooled_draw_m5_a <- pooled_effect_draw(m5_a)
 
 # study_draws_m5_a_hh <- study_draw(m5_a_hh)
@@ -415,7 +431,13 @@ m6_a_ecdf <- ecdf(exp(post_samples_m6_a$TE))
 # pooled_draw_m6 <- pooled_effect_draw(m6)
 
 study_draws_m6_a <- study_draw(m6_a)
-study_draws_m6_a$review_version[study_draws_m6_a$Author == "Guan"] <- "previous"
+study_draws_m6_a <- study_draws_m6_a %>%
+  mutate(review_version = as.character(review_version),
+         review_version = case_when(Author == "Guan" ~ "previous",
+                                    Author == "Hojbjerg" ~ "current",
+                                    Author == "P-HOSP-COVID.Collaborative" ~ "current",
+                                    TRUE ~ review_version)) %>%
+  mutate(review_version = factor(review_version))
 pooled_draw_m6_a <- pooled_effect_draw(m6_a)
 
 # study_draws_m6_a_hh <- study_draw(m6_a_hh)
@@ -492,7 +514,7 @@ pooled_draw_m7_a <- pooled_effect_draw(m7_a)
 study_draws_m7_a <- study_draws_m7_a %>%
   mutate(review_version = as.character(review_version),
          review_version = ifelse(is.na(review_version), "current", review_version),
-         review_version = as_factor(review_version))
+         review_version = factor(review_version, levels = c("previous", "current")))
 # study_draws_m7_a_hh <- study_draws_m7_a_hh %>%
 #   mutate(review_version = as.character(review_version),
 #          review_version = ifelse(is.na(review_version), "current", review_version),
@@ -568,7 +590,7 @@ pooled_draw_m8_a <- pooled_effect_draw(m8_a)
 study_draws_m8_a <- study_draws_m8_a %>%
   mutate(review_version = as.character(review_version),
          review_version = ifelse(is.na(review_version), "current", review_version),
-         review_version = as_factor(review_version))
+         review_version = factor(review_version, levels = c("previous", "current"))
 # study_draws_m8_a_hh <- study_draws_m8_a_hh %>%
 #   mutate(review_version = as.character(review_version),
 #          review_version = ifelse(is.na(review_version), "current", review_version),
@@ -629,13 +651,13 @@ tau <- rbind(
 
 write_rds(tau, here("output_data", "tau.rds"))
 # Export summary ----------------------------------------------------------
-
-write_rds(current_testing_alternative_prior, here("output_data", "current_testing_alternative.rds"))
-write_rds(former_testing_alternative_prior, here("output_data", "former_testing_alternative.rds"))
-write_rds(current_hospitalisation_alternative_prior, here("output_data", "current_hospitalisation_alternative.rds"))
-write_rds(former_hospitalisation_alternative_prior, here("output_data", "former_hospitalisation_alternative.rds"))
-write_rds(current_severity_alternative_prior, here("output_data", "current_severity_alternative.rds"))
-write_rds(former_severity_alternative_prior, here("output_data", "former_severity_alternative.rds"))
-write_rds(current_mortality_alternative_prior, here("output_data", "current_mortality_alternative.rds"))
-write_rds(former_mortality_alternative_prior, here("output_data", "former_mortality_alternative.rds"))
+# 
+# write_rds(current_testing_alternative_prior, here("output_data", "current_testing_alternative.rds"))
+# write_rds(former_testing_alternative_prior, here("output_data", "former_testing_alternative.rds"))
+# write_rds(current_hospitalisation_alternative_prior, here("output_data", "current_hospitalisation_alternative.rds"))
+# write_rds(former_hospitalisation_alternative_prior, here("output_data", "former_hospitalisation_alternative.rds"))
+# write_rds(current_severity_alternative_prior, here("output_data", "current_severity_alternative.rds"))
+# write_rds(former_severity_alternative_prior, here("output_data", "former_severity_alternative.rds"))
+# write_rds(current_mortality_alternative_prior, here("output_data", "current_mortality_alternative.rds"))
+# write_rds(former_mortality_alternative_prior, here("output_data", "former_mortality_alternative.rds"))
 

@@ -54,7 +54,11 @@ cleaned_names <- c('Chow, Us, Cdc',
                    "Vilar, Garcia",
                    "Ibarra, Nava",
                    "Mancilla, Galindo",
-                   "Prats, Uribe")
+                   "Prats, Uribe",
+                   "Phosp, Covid, Collaborative, Group",
+                   "Boscolo, Rizzo",
+                   "Concor, 1, Study, Group",
+                   "Prats, Uribe, Xie")
 
 correct_names <- c('Chow (US CDC)',
                    "Gold (US CDC)",
@@ -112,4 +116,8 @@ correct_names <- c('Chow (US CDC)',
                    "Vilar-Garcia",
                    "Ibarra-Nava",
                    "Mancilla-Galindo",
-                   "Prats-Uribe")
+                   "Prats-Uribe",
+                   "P-HOSP-COVID Collaborative",
+                   "Boscolo-Rizzo",
+                   "CONCOR-1 Study-group",
+                   "Prats-Uribe, Xie")

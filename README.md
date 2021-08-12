@@ -13,4 +13,5 @@ Instructions to perform analysis:
   4. This will download the file and split it into multiple excel files containing a single sheet. We will use these for the rest of the analysis.
   5. The next chunks produce datatable to show the number of studies included in each sheet.
   6. The `clean_data.R` script is run. If this is your first time running this analysis you may need to manually produce a `clean_data` folder for the files to be saved into.
-  7. 
+
+to be continued...

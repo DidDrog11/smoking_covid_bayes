@@ -291,9 +291,9 @@ The most up-to-date review version is available [here](https://www.qeios.com/rea
  * [Version 11](https://doi.org/10.32388/UJR2AW.13)
  
 ##    Data availability
-All data contributing to the current and future review versions are available [here](https://doi.org/10.6084/m9.figshare.12756020)
+All data contributing to the current and future review versions are available [here](https://doi.org/10.6084/m9.figshare.12756020.v7)
 
-All code required to reproduce the current and future analyses are available [here](https://doi.org/10.5281/zenodo.4002046)
+All code required to reproduce the current and future analyses are available [here](https://doi.org/10.5281/zenodo.5189278)
 
 #### To delete
 `r paste(tbl_1$ref)`
